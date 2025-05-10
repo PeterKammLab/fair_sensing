@@ -57,7 +57,7 @@ Clone the repository and install required dependencies:
 git clone [https://github.com/your-org/Fair_Sensing.git](https://github.com/your-org/Fair_Sensing.git)
 cd Fair_Sensing
 pip install -r requirements.txt
-```bash
+`````
 
 ## 🚀 How to Use
 
@@ -82,6 +82,7 @@ Example:
 
 ```bash
 python Optimization/optimization_vehicles_spatial.py
+`````
 
 ### 3. 📈 Analysis & Export
 
@@ -91,6 +92,7 @@ Analyze statistics and export visual-ready outputs:
 python Optimization/analysis_vehicles_stats.py
 python Optimization/calculate_VIZ_frequencies.py
 python Optimization/vehicle_VIZ_stats_exports.py
+`````
 
 ### 4. 🧪 Notebooks
 
