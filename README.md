@@ -60,6 +60,31 @@ cd Fair_Sensing
 pip install -r requirements.txt
 `````
 
+## Data
+
+The following files are included as raw (starting) data:
+
+- 🗺️ `bounding_box.geojson` – Spatial extent for clipping (city)
+- 🧱 `cbs_vk100_2021_vol.gpkg` – CBS 100x100m grid data (Netherlands)
+- 📊 `city_stats_amsterdam.csv` – Demographic statistics (city)
+- 🧭 `gemeente_T.*` – Shapefile set for municipal boundaries (city)
+- 🌐 `Gemeente2.geojson` – GeoJSON version of municipality polygons (city)
+- 🚋 `gtfs_realtime_data_12_to_19.xlsx` – Preprocessed GVB GTFS-realtime data
+- 🚌 `gtfs-nl.zip` – GTFS-static data for Dutch transit (zipped)
+- 💧 `water_amsterdam.gpkg` – Water bodies layer for map visualization
+
+The required GTFS (General Transit Feed Specification) Static + Reltime and CBS (Statistics Netherlands) grid data for running Fair Sensing can be downloaded from the following link:
+
+👉[**Download Data Here**](https://drive.google.com/drive/folders/1fw-R5vkeoFkxOWzpoEpzCw2sKcKDJV6D?usp=drive_link)
+
+Please download the data and place it in the `data/` directory of the Fair_Sensing_Repo to run the toolkit.
+
+If you want to speed up the processing time of preparation and optimization scripts, there are preprocessed datasets available here:
+
+👉 [**Download Preprocessed Datasets**](https://drive.google.com/drive/folders/1bclSHPW3tyJIaa-wzkbg9RF1gmw9vXaF?usp=sharing)
+
+Alternatively, Fair Sensing is designed to be flexible. You can also use your own GTFS and GTFS-realtime data, placing it within the `data/` directory and ensuring the file names are consistent with the expected input formats for the scripts. This allows you to analyze specific datasets and real-world scenarios as you wish.
+
 ## 🚀 How to Use
 
 ### 1. 📊 Data Preparation  
