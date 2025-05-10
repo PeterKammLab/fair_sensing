@@ -48,6 +48,7 @@ Fair_Sensing_Repo/
 
 ├── .gitignore
 └── README.md
+
 ## ⚙️ Installation
 
 Clone the repository and install required dependencies:
