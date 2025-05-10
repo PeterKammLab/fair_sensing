@@ -18,100 +18,36 @@ Fair_Sensing_Repo/
 ├── data/                        # Input data: GTFS, CBS, boundary files
 
 ├── Optimization/               # All vehicle optimization strategy scripts
-
-│   ├── analysis_vehicles_stats.py
-
-│
-
-│   ├── calculate_VIZ_frequencies.py
-
-│
-
-│   ├── create_combined_df.py
-
-│
-
-│   ├── create_optimized_vehicles_gdf.py
-
-│
-
-│   ├── optimization_big_merge_stats_VIZ_points.py
-
-│
-
-│   ├── optimization_vehicles_spatial.py
-
-│
-
-│   ├── optimization_vehicles_maximum.py
-
-│
-
-│   ├── optimization_vehicles_fairness.py
-
-│
-
-│   └── vehicle_VIZ_stats_exports.py
+  - analysis_vehicles_stats.py
+  - calculate_VIZ_frequencies.py
+  - create_combined_df.py
+  - create_optimized_vehicles_gdf.py
+  - optimization_big_merge_stats_VIZ_points.py
+  - optimization_vehicles_spatial.py
+  - optimization_vehicles_maximum.py
+  - optimization_vehicles_fairness.py
+  - vehicle_VIZ_stats_exports.py
 
 ├── Preparation/                # Preprocessing of CBS grids, GTFS and lines
-
-│   ├── analysis_viz_lines_stats_cbs_sensed.py
-
-│
-
-│   ├── cbs_data_cleanup.py
-
-│
-
-│   ├── clean_filter_cbs_city_stats.py
-
-│
-
-│   ├── create_public_lines.py
-
-│
-
-│   ├── fairest_lines_analysis_viz.py
-
-│
-
-│   ├── intersection_points_cbs_frequency.py
-
-│
-
-│   ├── merge_interpolate_gtfs_static_realtime.py
-
-│
-
-│   └── snap_points_to_lines.py
+  - analysis_viz_lines_stats_cbs_sensed.py
+  - cbs_data_cleanup.py
+  - clean_filter_cbs_city_stats.py
+  - create_public_lines.py
+  - fairest_lines_analysis_viz.py
+  - intersection_points_cbs_frequency.py
+  - merge_interpolate_gtfs_static_realtime.py
+  - snap_points_to_lines.py
 
 ├── notebooks/                  # Notebooks for fast analysis
-
-│   ├── prep_notebook.ipynb
-
-│
-
-│   ├── opti_notebook.ipynb
-
-│
-
-│   ├── viz_notebook.ipynb
-
-│
-
-│   ├── prep_notebook_3days.ipynb
-
-│
-
-│   ├── prep_notebook_7days.ipynb
-
-│
-
-│   └── opti_notebook_3days.ipynb
+  - prep_notebook.ipynb
+  - opti_notebook.ipynb
+  - viz_notebook.ipynb
+  - prep_notebook_3days.ipynb
+  - prep_notebook_7days.ipynb
+  - opti_notebook_3days.ipynb
 
 ├── .gitignore
 └── README.md
-
 ## ⚙️ Installation
 
 Clone the repository and install required dependencies:
