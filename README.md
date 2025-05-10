@@ -57,6 +57,7 @@ Clone the repository and install required dependencies:
 git clone [https://github.com/your-org/Fair_Sensing.git](https://github.com/your-org/Fair_Sensing.git)
 cd Fair_Sensing
 pip install -r requirements.txt
+```bash
 
 ## 🚀 How to Use
 
