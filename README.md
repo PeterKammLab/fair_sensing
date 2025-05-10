@@ -4,7 +4,9 @@ Fair Sensing is a research-driven Python toolkit for optimizing the spatial depl
 
 ---
 
-Research Title: **All-inclusive Public Transport - Optmization for Equitalbe Sensing for Amsterdam (and other Dutch cities)** /n w. T. Venverloo, F. Duarte, R. Vrijhoef
+📄 Research Title   **All-inclusive Public Transport – Optimization for Equitable Sensing for Amsterdam (and other Dutch cities)**  
+*With P.Koljensic T. Venverloo*<br>*F. Duarte*<br>*R. Vrijhoef*
+
 
 
 ## 💡 Key Features
