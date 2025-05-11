@@ -63,6 +63,7 @@ git clone [https://github.com/your-org/Fair_Sensing.git](https://github.com/your
 cd Fair_Sensing
 pip install -r requirements.txt
 `````
+#Replace your-org with your GitHub username or organization name.
 
 ## Data
 
