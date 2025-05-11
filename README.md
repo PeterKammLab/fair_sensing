@@ -17,7 +17,7 @@ Fair Sensing is a research-driven Python toolkit for optimizing the spatial depl
 
 ## 📁 Repository Structure
 
-Fair_Sensing_Repo/
+**fair_sensing/**
 
 ├── data/                        # Input data: GTFS, CBS, boundary files
 
