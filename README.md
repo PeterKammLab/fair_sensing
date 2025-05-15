@@ -132,7 +132,7 @@ Use notebooks for interactive workflows:
 -   `prep_notebook.ipynb`: Clean and prepare CBS and GTFS
 -   `opti_notebook.ipynb`: Run optimization strategies
 -   `viz_notebook.ipynb`: Visualize outputs and maps
--   `*_3days.ipynb`, `*_7days.ipynb`: Sensitivity tests on time windows
+-   `*_3days.ipynb`, `*_7days.ipynb`: Extending and running for multiple days
 
 ## 📄 License
 
