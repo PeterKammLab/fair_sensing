@@ -47,7 +47,7 @@ def extract_string_lists(df, prefixes=None):
         dict: { column_name: [str(id1), str(id2), …], … }
     """
     if prefixes is None:
-        prefixes = ('max_','closest', 'fairest_', 'combined_', 'random')
+        prefixes = ('max_','closest', 'fairest_', 'combined_', 'random', 'all_')
 
     strategy_cols = [
         col for col in df.columns
@@ -338,9 +338,8 @@ def add_city_column(merged_df, ams_stats, cbs_gdf, vehicles_gdf, city_name='Amst
     Adds a new column to merged_df with values for a city (default: Amsterdam).
     Fills key indicators from stats, CBS, and vehicle data.
     """
-    # extract AMS stats as Series
-    ams = ams_stats.iloc[0] if isinstance(ams_stats, pd.DataFrame) else ams_stats
 
+    ams = ams_stats.iloc[0] if isinstance(ams_stats, pd.DataFrame) else ams_stats
     merged_df[city_name] = pd.NA
 
     mapping = {
@@ -366,10 +365,11 @@ def add_city_column(merged_df, ams_stats, cbs_gdf, vehicles_gdf, city_name='Amst
     if 'cells_unique' in merged_df.index:
         merged_df.at['cells_unique', city_name] = len(cbs_gdf)
 
+    # Fill technical values
     merged_df.at['buses_count', city_name] = int((vehicles_gdf['route_type_left'] == 3).sum())
     merged_df.at['trams_count', city_name] = int((vehicles_gdf['route_type_left'] == 0).sum())
 
-    # extract unique routes
+    # Unique routes
     unique_routes = set()
     for val in vehicles_gdf['route_id']:
         if isinstance(val, list):
@@ -389,8 +389,13 @@ def add_city_column(merged_df, ams_stats, cbs_gdf, vehicles_gdf, city_name='Amst
     merged_df.at['routes_unique', city_name] = len(unique_routes)
     merged_df.at['count', city_name] = int(vehicles_gdf['count'].sum())
 
-    # fill unused rows with dash
-    for row in ['A_inhab', 'A_0_15', 'A_65+', 'A_nederlan', 'A_n_west_m']:
+    # Fill unused or not-available rows with dash
+    dash_rows = [
+        'A_inhab', 'A_0_15', 'A_65+', 'A_nederlan', 'A_n_west_m',
+        'count', 'buses_count', 'trams_count', 'routes_unique', 'avg_points_per_cell'
+    ]
+
+    for row in dash_rows:
         if row in merged_df.index:
             merged_df.at[row, city_name] = '-'
 
@@ -398,38 +403,52 @@ def add_city_column(merged_df, ams_stats, cbs_gdf, vehicles_gdf, city_name='Amst
 
 
 
+
+# Updated function: adds both `cells_unique` and `avg_points_per_cell` to summary_df
+
 def add_cells_unique_counts(
     summary_df,
     vehicles_gdf,
     lists_dict,
     id_col='uni_id',
-    crs_col='crs28922_list'
+    crs_col='crs28922_list',
+    count_col='count'
 ):
     """
-    Adds a 'cells_unique' row to summary_df containing the count of unique CRS codes
-    for each strategy (from lists_dict) and for Amsterdam (all vehicles).
+    Adds 'cells_unique' and 'avg_points_per_cell' rows to summary_df.
 
     Parameters:
-        summary_df   : DataFrame with columns = list(lists_dict.keys()) + ['Amsterdam']
-        vehicles_gdf : GeoDataFrame containing at least id_col and crs_col
+        summary_df   : DataFrame with strategy columns + 'Amsterdam'
+        vehicles_gdf : GeoDataFrame with vehicle and CRS data
         lists_dict   : dict {strategy_label: [uni_id, ...]}
-        id_col       : column name for vehicle ID in vehicles_gdf
-        crs_col      : column name holding list of CRS codes in vehicles_gdf
+        id_col       : column with vehicle ID
+        crs_col      : column with list of CRS codes
+        count_col    : column with total measurement count
 
     Returns:
-        summary_df with an added 'cells_unique' row.
+        summary_df with new rows added.
     """
     counts = {}
-    # strategy‐specific counts
+    avg_per_cell = {}
+
+    # Strategy-specific counts and ratios
     for label, vid_list in lists_dict.items():
         subset = vehicles_gdf[vehicles_gdf[id_col].astype(str).isin(vid_list)]
-        codes = extract_unique_crs_codes(subset, column=crs_col)
-        counts[label] = len(codes)
-    # Amsterdam count
-    counts['Amsterdam'] = len(extract_unique_crs_codes(vehicles_gdf, column=crs_col))
+        crs_codes = extract_unique_crs_codes(subset, column=crs_col)
+        counts[label] = len(crs_codes)
+        total_count = subset[count_col].sum()
+        avg_per_cell[label] = round(total_count / len(crs_codes), 2) if len(crs_codes) > 0 else 0
 
-    # insert row
+    # Amsterdam totals
+    ams_crs = extract_unique_crs_codes(vehicles_gdf, column=crs_col)
+    counts['Amsterdam'] = len(ams_crs)
+    ams_total_count = vehicles_gdf[count_col].sum()
+    avg_per_cell['Amsterdam'] = round(ams_total_count / len(ams_crs), 2) if len(ams_crs) > 0 else 0
+
+    # Insert new rows
     summary_df.loc['cells_unique'] = pd.Series(counts, dtype=int)
+    summary_df.loc['avg_points_per_cell'] = pd.Series(avg_per_cell)
+
     return summary_df
 
 
@@ -458,10 +477,12 @@ def vehicle_optimization_stats_pipeline(
     cbs,
     ams_stats,
     max_space_vehicles,
+    max_temp_vehicles,
     max_pop_vehicles,
     fair_vehicles,
     combined_vehicles,
-    random_vehicles
+    random_vehicles, 
+    all_vehicles
 ):
     """
     Full pipeline for computing and comparing vehicle optimization strategies.
@@ -485,10 +506,12 @@ def vehicle_optimization_stats_pipeline(
     # Combine all strategy outputs
     combined_df = create_combined_vehicle_df(
         max_space_vehicles,
+        max_temp_vehicles,
         max_pop_vehicles,
         fair_vehicles,
         combined_vehicles,
-        random_vehicles
+        random_vehicles,
+        all_vehicles
     )
 
     # Extract dict {strategy: [vehicle_ids]}

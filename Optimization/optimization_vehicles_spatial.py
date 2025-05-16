@@ -73,44 +73,44 @@ def prepare_vehicle_unique_ids(points_gdf, cbs_gdf):
     return vehicle_unique_ids, points_gdf
 
 
-def select_vehicles_for_max_coverage(points_gdf, vehicle_unique_ids, coverage_threshold=3):
-    """
-    Selects vehicles (uni_ids) iteratively to maximize CBS cell coverage.
+# def select_vehicles_for_max_coverage(points_gdf, vehicle_unique_ids, coverage_threshold=3):
+#     """
+#     Selects vehicles (uni_ids) iteratively to maximize CBS cell coverage.
 
-    Parameters:
-    - points_gdf          : GeoDataFrame with 'uni_id' and 'id' (CBS cell ID).
-    - vehicle_unique_ids  : DataFrame with 'uni_id' and 'unique_id_count' (number of unique cells per vehicle).
-    - coverage_threshold  : Minimum increase in coverage to continue selection (default = 3).
+#     Parameters:
+#     - points_gdf          : GeoDataFrame with 'uni_id' and 'id' (CBS cell ID).
+#     - vehicle_unique_ids  : DataFrame with 'uni_id' and 'unique_id_count' (number of unique cells per vehicle).
+#     - coverage_threshold  : Minimum increase in coverage to continue selection (default = 3).
 
-    Returns:
-    - selected_uni_ids_df : DataFrame of selected vehicles with their 'unique_id_count'.
-    """
+#     Returns:
+#     - selected_uni_ids_df : DataFrame of selected vehicles with their 'unique_id_count'.
+#     """
 
-    covered_poly_ids = []
-    selected_uni_ids_df = pd.DataFrame(columns=['uni_id'])
+#     covered_poly_ids = []
+#     selected_uni_ids_df = pd.DataFrame(columns=['uni_id'])
 
-    while True:
-        # Use helper function to find the next best vehicle
-        next_group, increase = find_next_group(points_gdf, covered_poly_ids)
+#     while True:
+#         # Use helper function to find the next best vehicle
+#         next_group, increase = find_next_group(points_gdf, covered_poly_ids)
 
-        if increase <= coverage_threshold:
-            break
+#         if increase <= coverage_threshold:
+#             break
 
-        # Update covered CBS cells
-        covered_poly_ids.extend(points_gdf.loc[points_gdf['uni_id'] == next_group, 'id'].unique())
+#         # Update covered CBS cells
+#         covered_poly_ids.extend(points_gdf.loc[points_gdf['uni_id'] == next_group, 'id'].unique())
 
-        # Add selected vehicle
-        selected_uni_ids_df = pd.concat(
-            [selected_uni_ids_df, pd.DataFrame({'uni_id': [next_group]})],
-            ignore_index=True
-        )
+#         # Add selected vehicle
+#         selected_uni_ids_df = pd.concat(
+#             [selected_uni_ids_df, pd.DataFrame({'uni_id': [next_group]})],
+#             ignore_index=True
+#         )
 
-        # Merge unique counts into the selection list
-        selected_uni_ids_df = selected_uni_ids_df.merge(
-            vehicle_unique_ids, on='uni_id', how='left'
-        )
+#         # Merge unique counts into the selection list
+#         selected_uni_ids_df = selected_uni_ids_df.merge(
+#             vehicle_unique_ids, on='uni_id', how='left'
+#         )
 
-    return selected_uni_ids_df
+#     return selected_uni_ids_df
 
 def select_vehicles_for_max_coverage(points_gdf, vehicle_unique_ids, coverage_threshold=3):
     """
@@ -160,6 +160,34 @@ def extract_top_spatial_selection(selected_uni_ids_df, vehicles_df, top_n=10):
     filtered_vehicles = vehicles_df[vehicles_df['uni_id'].isin(optimized_ids)].copy()
 
     return optimized_ids, filtered_vehicles
+
+def extract_top_spatial_selection(selected_uni_ids_df, vehicles_df, top_n=10, seed=None):
+    """
+    Extracts top-N spatially optimized vehicles, padding with random ones if needed.
+
+    Parameters:
+    - selected_uni_ids_df : DataFrame with 'uni_id' column
+    - vehicles_df         : GeoDataFrame with 'uni_id'
+    - top_n               : desired number of vehicles
+    - seed                : random seed for reproducibility
+
+    Returns:
+    - optimized_ids       : list of selected uni_ids (as 'max_spatial')
+    - filtered_vehicles   : GeoDataFrame filtered to those IDs
+    """
+    top_selected = selected_uni_ids_df.head(top_n).copy()
+    top_selected.rename(columns={'uni_id': 'max_spatial'}, inplace=True)
+    optimized_ids = top_selected['max_spatial'].tolist()
+
+    if len(optimized_ids) < top_n:
+        remaining = vehicles_df[~vehicles_df['uni_id'].isin(optimized_ids)]
+        additional = remaining.sample(n=top_n - len(optimized_ids), random_state=seed)
+        extra_ids = additional['uni_id'].tolist()
+        optimized_ids.extend(extra_ids)
+
+    filtered_vehicles = vehicles_df[vehicles_df['uni_id'].isin(optimized_ids)].copy()
+    return optimized_ids, filtered_vehicles
+
 
 # FINAL FUNCTION
 

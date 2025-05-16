@@ -1,5 +1,6 @@
 from .analysis_vehicles_stats import prepare_vehicles_with_stats # first make stats for vehicles
 from .optimization_vehicles_spatial import spatial_optimization_pipeline # then optimize the vehicles for spatial coverage
+from .optimization_vehicles_temporal import temporal_optimization_pipeline # then optimize the vehicles for temporal coverage
 from .optimization_vehicles_fairness import run_fairness_pipeline # then optimize the vehicles for fairness
 from .optimization_vehicles_maximum import run_max_coverage_pipeline # then optimize the vehicles for maximum inhabitants, points, etc. 
 from .create_combined_df import combine_optimized_dfs # combine the results into one dataframe

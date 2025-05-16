@@ -148,7 +148,7 @@ def iterative_closest_vehicles_absolute(gdf, ams_gdf, target_n=10):
         )
         i += 1
 
-    vehicles_absolute = closest_vehicle_df.sort_values('distance', ascending=True).head(10)['uni_id'].values
+    vehicles_absolute = closest_vehicle_df.sort_values('distance', ascending=True).head(target_n)['uni_id'].values
     vehicles_absolute = vehicles_absolute.tolist()
 
     return closest_vehicle_df, vehicles_absolute
@@ -224,7 +224,7 @@ def create_area_comparison_statistics(ams_gdf, df_closest, df_rel, df_abs):
     return pd.DataFrame(data).round(2)
 
 
-def generate_optimization_vehicle_table(closest_absolute, closest_relative, closest_closest):
+def generate_optimization_vehicle_table(closest_absolute, closest_relative, closest_closest, n):
     """
     Create tables of vehicle IDs from different optimization strategies.
 
@@ -247,9 +247,9 @@ def generate_optimization_vehicle_table(closest_absolute, closest_relative, clos
     })
 
     df_vehicle_ids = pd.DataFrame({
-        'closest_absolute': closest_absolute['uni_id'].tolist()[:10],
-        'closest_relative': closest_relative['uni_id'].tolist()[:10],
-        'closest_simple':  closest_closest['uni_id'].tolist()[:10]
+        'closest_absolute': closest_absolute['uni_id'].tolist()[:n],
+        'closest_relative': closest_relative['uni_id'].tolist()[:n],
+        'closest_simple':  closest_closest['uni_id'].tolist()[:n]
     })
 
     return df_optimizations, df_vehicle_ids
@@ -301,7 +301,7 @@ def run_fairness_pipeline(gdf, ams_gdf, n=10):
 
     # 8) compile vehicle ID tables
     df_optimizations, df_vehicle_ids = generate_optimization_vehicle_table(
-        closest_absolute, closest_relative, closest_simple
+        closest_absolute, closest_relative, closest_simple, n
     )
 
     return closest_simple, closest_relative, closest_absolute, df_area_statistics, df_optimizations, df_vehicle_ids

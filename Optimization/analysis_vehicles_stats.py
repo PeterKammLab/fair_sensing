@@ -7,10 +7,12 @@ import plotly.express as px
 from shapely.geometry import MultiPoint
 import ast
 
+
 def create_vehicles_gdf(points_df):
     """
     Aggregate points_df by uni_id into vehicles_1503 GeoDataFrame.
     """
+
     # 1. stats aggregation
     stats = points_df.groupby("uni_id").agg(
         route_id=("route_id_left", lambda x: list(set(x))),
@@ -36,16 +38,38 @@ def create_vehicles_gdf(points_df):
             for item in ast.literal_eval(row)
         ))
     )
-    # 5. Delte crs28992_list column (firstly created) and add instead crs28992_list (second)
-    df.drop(columns=["crs28992_list"], inplace=True)
-    df.rename(columns={"crs28992_list": "crs28922_list"}, inplace=True)
-    # 6. add crs28992_list after royute_id
-    df = df[["uni_id", "route_id", "crs28922_list", "min_new_timest", "max_new_timest", "count", "geometry"]]
 
+    # 5. delete crs28992_list and rename correctly
+    df.drop(columns=["crs28992_list"], inplace=True)
+    df.rename(columns={"crs28922_list": "crs28922_list"}, inplace=True)
+
+    # 6. count unique values in crs28922_list
+    df["crs28992_uniq"] = df["crs28922_list"].apply(lambda x: len(set(x)))
+
+    # 7. count measured values per unique crs28922
+    df["avg_count_per_crs28992"] = df.apply(
+        lambda x: x["count"] / x["crs28992_uniq"] if x["crs28992_uniq"] > 0 else 0,
+        axis=1
+    ).round(2)
+
+    # 8. count unique measurement days from original points_df
+    unique_days = points_df.copy()
+    unique_days["date"] = pd.to_datetime(unique_days["new_timest"], unit="s").dt.date
+    day_counts = unique_days.groupby("uni_id")["date"].nunique().reset_index(name="n_unique_days")
+    df = df.merge(day_counts, on="uni_id", how="left")
+
+    # 9. reorder columns
+    df = df[[
+        "uni_id", "route_id", "crs28922_list",
+        "min_new_timest", "max_new_timest", "count",
+        "crs28992_uniq", "avg_count_per_crs28992", "n_unique_days",
+        "geometry"
+    ]]
+
+    # 10. return GeoDataFrame
     gdf_vehicles = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:28992")
-    
-    # 7. return GeoDataFrame
-    return gdf_vehicles 
+    return gdf_vehicles
+
 
 def enrich_vehicles_with_cbs_and_routes(vehicles_gdf, points_gdf, cbs_gdf):
     """
@@ -92,7 +116,7 @@ def enrich_vehicles_with_cbs_and_routes(vehicles_gdf, points_gdf, cbs_gdf):
     vehicles_gdf[mean_col] = vehicles_gdf[mean_col].round(1)
 
     # Sort and reorder columns
-    ordered_cols = ['uni_id', 'route_id', 'route_type_left', 'crs28922_list', 'min_new_timest', 'max_new_timest', 'count'] + sum_cols + [mean_col, 'geometry']
+    ordered_cols = ['uni_id', 'route_id', 'route_type_left', 'crs28922_list', 'min_new_timest', 'max_new_timest', 'count',  "crs28992_uniq", "avg_count_per_crs28992", "n_unique_days"] + sum_cols + [mean_col, 'geometry']
     vehicles_gdf = vehicles_gdf[ordered_cols]
 
     vehicles_gdf.sort_values(by='A_inhab', ascending=False, inplace=True)
