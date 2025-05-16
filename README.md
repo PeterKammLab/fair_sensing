@@ -71,12 +71,12 @@ The following files are included as raw (starting) data:
 
 - 🗺️ `bounding_box.geojson` – Spatial extent for clipping (city) 
 - 🧱 `cbs_vk100_2021_vol.gpkg` – CBS 100x100m grid data (Netherlands) | [source CBS](https://www.cbs.nl/nl-nl/longread/diversen/2022/statistische-gegevens-per-vierkant-2021-2020-2019)
-- 📊 `city_stats_amsterdam.csv` – Demographic statistics (city)
-- 🧭 `gemeente_T.*` – Shapefile set for municipal boundaries (city)
-- 🌐 `Gemeente2.geojson` – GeoJSON version of municipality polygons (city)
-- 🚋 `gtfs_realtime_data_12_to_19.xlsx` – Preprocessed GVB GTFS-realtime data
-- 🚌 `gtfs-nl.zip` – GTFS-static data for Dutch transit (zipped)
-- 💧 `water_amsterdam.gpkg` – Water bodies layer for map visualization
+- 📊 `city_stats_amsterdam.csv` – Demographic statistics (city) | [source CBS](https://www.cbs.nl/nl-nl/longread/diversen/2022/statistische-gegevens-per-vierkant-2021-2020-2019)
+- 🧭 `gemeente_T.*` – Shapefile set for municipal boundaries (city) | [source Gemeente Amsterdam](https://maps.amsterdam.nl/open_geodata/)
+- 🌐 `Gemeente2.geojson` – GeoJSON version of municipality polygons (city) | [source Gemeente Amsterdam](https://maps.amsterdam.nl/open_geodata/)
+- 🚋 `gtfs_realtime_data_12_to_19.xlsx` – Preprocessed GVB GTFS-realtime data | [source GTFS Realtime Feed](https://developers.google.com/transit/gtfs-realtime)
+- 🚌 `gtfs-nl.zip` – GTFS-static data for Dutch transit (zipped) |  [source GTFS OV NL](https://gtfs.ovapi.nl/)
+- 💧 `water_amsterdam.gpkg` – Water bodies layer for map visualization | [source OpenStreepMap](https://www.openstreetmap.org/)
 
 The required GTFS (General Transit Feed Specification) Static + Reltime and CBS (Statistics Netherlands) grid data for running Fair Sensing can be downloaded from the following link:
 
