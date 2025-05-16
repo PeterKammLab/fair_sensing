@@ -90,6 +90,19 @@ If you want to speed up the processing time of preparation and optimization scri
 
 Alternatively, Fair Sensing is designed to be flexible. You can also use your own GTFS and GTFS-realtime data, placing it within the `data/` directory and ensuring the file names are consistent with the expected input formats for the scripts. This allows you to analyze specific datasets and real-world scenarios as you wish.
 
+## 📊 Workflow Overview
+
+Below are key flowcharts describing the logic and process of Fair Sensing:
+
+**🧹 Parameters, Data & Download**
+![Parameters, Data & Download Diagram](images/parameters_data_download_diagram.png)
+
+**🧹 Preparation Pipeline**
+![Preparation Flowchart](images/prep_flowchart.png)
+
+**🚦 Optimization, Freq & Vis Pipeline**
+![Optimization, Frequency and Visualisation Flowchart](images/opti_viz_freq_flowchart.png)
+
 ## 🚀 How to Use
 
 ### 1. 📊 Data Preparation  
