@@ -95,13 +95,13 @@ Alternatively, Fair Sensing is designed to be flexible. You can also use your ow
 Below are key flowcharts describing the logic and process of Fair Sensing:
 
 **💾 Parameters, Data & Download**
-![Parameters, Data & Download Diagram](images/parameters_data_download_diagram.png)
+![Parameters, Data & Download Diagram](images/parameters_data_download_diagram.jpg)
 
 **🧹 Preparation Pipeline**
-![Preparation Flowchart](images/prep_flowchart.png)
+![Preparation Flowchart](images/prep_flowchart.jpg)
 
 **🚦 Optimization, Freq & Vis Pipeline**
-![Optimization, Frequency and Visualisation Flowchart](images/opti_viz_freq_flowchart.png)
+![Optimization, Frequency and Visualisation Flowchart](images/opti_viz_freq_flowchart.jpg)
 
 ## 🚀 How to Use
 
