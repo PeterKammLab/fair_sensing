@@ -69,8 +69,8 @@ pip install -r requirements.txt
 
 The following files are included as raw (starting) data:
 
-- 🗺️ `bounding_box.geojson` – Spatial extent for clipping (city) | 
-🧱 `cbs_vk100_2021_vol.gpkg` – CBS 100x100m grid data (Netherlands) | [source](https://www.cbs.nl/nl-nl/longread/diversen/2022/statistische-gegevens-per-vierkant-2021-2020-2019)
+- 🗺️ `bounding_box.geojson` – Spatial extent for clipping (city) 
+- 🧱 `cbs_vk100_2021_vol.gpkg` – CBS 100x100m grid data (Netherlands) | [source CBS](https://www.cbs.nl/nl-nl/longread/diversen/2022/statistische-gegevens-per-vierkant-2021-2020-2019)
 - 📊 `city_stats_amsterdam.csv` – Demographic statistics (city)
 - 🧭 `gemeente_T.*` – Shapefile set for municipal boundaries (city)
 - 🌐 `Gemeente2.geojson` – GeoJSON version of municipality polygons (city)
