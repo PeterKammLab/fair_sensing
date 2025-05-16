@@ -94,7 +94,7 @@ Alternatively, Fair Sensing is designed to be flexible. You can also use your ow
 
 Below are key flowcharts describing the logic and process of Fair Sensing:
 
-**🧹 Parameters, Data & Download**
+** 💾 Parameters, Data & Download**
 ![Parameters, Data & Download Diagram](images/parameters_data_download_diagram.png)
 
 **🧹 Preparation Pipeline**
