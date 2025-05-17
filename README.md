@@ -1,6 +1,6 @@
 # Fair Sensing
 
-Fair Sensing is a research-driven Python toolkit for optimizing the spatial deployment of public transport vehicles to maximize environmental sensing, demographic coverage, and spatial fairness. It provides a modular pipeline to prepare, compute, and visualize multiple optimization strategies across urban geographies using GTFS data, CBS (Statistics Netherlands) grids, and spatial analysis techniques.
+Fair Sensing is a Python toolkit for optimizing the deployment of limited number of sensors on public transport vehicles to maximize environmental sensing potenital for different metrics such as spatial and population coverage, frequency and sociodemographic fairness. It provides a modular pipeline to prepare, compute, and visualize multiple optimization strategies across urban geographies using GTFS data, CBS (Statistics Netherlands) grids, and spatial analysis and visualization techniques.
 
 ---
 
@@ -10,9 +10,9 @@ Fair Sensing is a research-driven Python toolkit for optimizing the spatial depl
 
 ## 💡 Key Features
 
--   Combine multiple strategies: spatial, demographic, fairness
--   Analyze demographic equity: % youth, elderly, Dutch/non-western migrants
--   Export full sensing coverage and vehicle deployment stats
+-   Apply multiple strategies: spatial, temporal demographic, fairness
+-   Analyze demographic equity: e.g. % youth, elderly, Dutch/non-western migrants
+-   Export full sensing coverage and vehicle deployment stats 
 -   Compatible with GTFS-static, GTFS-realtime and CBS 100x100m grid data
 
 ## 📁 Repository Structure
@@ -28,6 +28,7 @@ Fair Sensing is a research-driven Python toolkit for optimizing the spatial depl
   - create_optimized_vehicles_gdf.py
   - optimization_big_merge_stats_VIZ_points.py
   - optimization_vehicles_spatial.py
+  - optmization_vehicles_temporal.py
   - optimization_vehicles_maximum.py
   - optimization_vehicles_fairness.py
   - vehicle_VIZ_stats_exports.py
@@ -49,8 +50,11 @@ Fair Sensing is a research-driven Python toolkit for optimizing the spatial depl
   - prep_notebook_3days.ipynb
   - prep_notebook_7days.ipynb
   - opti_notebook_3days.ipynb
+  - research_notbook.ipynb #Exports for the research paper
 
 ├── .gitignore
+
+├── requirements.txt
 
 └── README.md
 
@@ -118,6 +122,7 @@ python Preparation/merge_interpolate_gtfs_static_realtime.py
 Each script implements a specific logic:
 
 -   **Spatial coverage:** `optimization_vehicles_spatial.py`
+-   **Temporal coverage:** 'optmiziation_vehicles_temporal.py'
 -   **Maximize population sensing:** `optimization_vehicles_maximum.py`
 -   **Fairness-based matching:** `optimization_vehicles_fairness.py`
 -   **Combine outputs:** `create_combined_df.py`
@@ -145,6 +150,7 @@ Use notebooks for interactive workflows:
 -   `prep_notebook.ipynb`: Clean and prepare CBS and GTFS
 -   `opti_notebook.ipynb`: Run optimization strategies
 -   `viz_notebook.ipynb`: Visualize outputs and maps
+-   `freq_notebook.ipynb`: Calculate and visualize frequency 
 -   `*_3days.ipynb`, `*_7days.ipynb`: Extending and running for multiple days
 
 ## 📄 License
