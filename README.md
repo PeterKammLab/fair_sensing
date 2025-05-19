@@ -50,6 +50,8 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
   - prep_notebook_3days.ipynb
   - prep_notebook_7days.ipynb
   - opti_notebook_3days.ipynb
+  - opti_notebook_random.ipynb #Dataframes for research
+  - opti_notebook_summary.ipynb #Dataframes for research
   - research_notbook.ipynb #Exports for the research paper
 
 ├── .gitignore
@@ -153,7 +155,7 @@ Use notebooks for interactive workflows:
 -   `freq_notebook.ipynb`: Calculate and visualize frequency 
 -   `*_3days.ipynb`, `*_7days.ipynb`: Extending and running for multiple days
 -   `opti_notebook_random.ipynb`, `opti_notebook_summary.ipynb`: Create dataframes for research article 
--   `research_notebook_random.ipynb`: Make visualizations for research article
+-   `research_notebook.ipynb`: Make visualizations for research article
 
 ## 📄 License
 
