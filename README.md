@@ -20,7 +20,6 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
 **fair_sensing/**
 
 ├── data/                        # Input data: GTFS, CBS, boundary files
-
 ├── Optimization/               # All vehicle optimization strategy scripts
   - analysis_vehicles_stats.py
   - calculate_VIZ_frequencies.py
@@ -32,7 +31,6 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
   - optimization_vehicles_maximum.py
   - optimization_vehicles_fairness.py
   - vehicle_VIZ_stats_exports.py
-
 ├── Preparation/                # Preprocessing of CBS grids, GTFS and lines
   - analysis_viz_lines_stats_cbs_sensed.py
   - cbs_data_cleanup.py
@@ -42,7 +40,6 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
   - intersection_points_cbs_frequency.py
   - merge_interpolate_gtfs_static_realtime.py
   - snap_points_to_lines.py
-
 ├── notebooks/                  # Notebooks for fast analysis
   - prep_notebook.ipynb
   - opti_notebook.ipynb
@@ -53,12 +50,10 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
   - opti_notebook_random.ipynb #Dataframes for research
   - opti_notebook_summary.ipynb #Dataframes for research
   - research_notbook.ipynb #Exports for the research paper
-
 ├── .gitignore
-
 ├── requirements.txt
-
 └── README.md
+└── FUNCTIONS.md # 👉 [Pipeline](./PIPELINE.md)
 
 ## ⚙️ Installation
 
