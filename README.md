@@ -11,7 +11,7 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
 ## 💡 Key Features
 
 -   Apply multiple strategies: spatial, temporal demographic, fairness
--   Analyze demographic equity: e.g. % youth, elderly, Dutch/non-western migrants
+-   Analyze demographic equity: e.g. % youth, elderly, Dutch/non-western migrants in sensed areas
 -   Export full sensing coverage and vehicle deployment stats 
 -   Compatible with GTFS-static, GTFS-realtime and CBS 100x100m grid data
 
