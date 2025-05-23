@@ -52,13 +52,14 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
   - opti_notebook_random.ipynb     #Dataframes for research
   - opti_notebook_summary.ipynb    #Dataframes for research
   - research_notbook.ipynb         #Exports for the research paper
+  - 
 ├── .gitignore
 
 ├── requirements.txt
 
 └── README.md
 
-└── FUNCTIONS.md                     # 👉 [Pipeline](./PIPELINE.md)
+└── FUNCTIONS.md                     # 👉 [Pipeline](./FUNCTIONS.md)
 
 ## ⚙️ Installation
 
