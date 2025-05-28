@@ -22,7 +22,7 @@ buffer_distance = 50  # Buffer distance in meters
 
 ### PROCESS
 
-#  'Cleaning CBS data'# here we had to shorten column names in functio definition
+#  'Cleaning CBS data' # here we had to shorten column names in functio definition
 
 
 ### RAW DATA INPUT: CBS 100x100 NL / CITY BORDER
@@ -45,7 +45,75 @@ def process_cbs_data(cbs: gpd.GeoDataFrame, city: gpd.GeoDataFrame) -> tuple[gpd
     return semi_cbs, nan_summary
 ```
 
-# Something else
+#  'Final CBS data wrangling' # ## Final FUNCTION 
+- For Amsterdam cleaned, filled, predicted, for space - 
+- Ready for use
+
+### INPUT DATA: CBS SEMI CLEANED 
+### OUTPUT DATA: CBS FULLY CLEANED  
+
+```python
+def final_cbs_pipeline(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Pipeline to process CBS data:
+    1. Clean and adjust population groups
+    2. Impute missing G_woz_woni values
+    3. Adjust any remaining negative values
+    """
+    cbs_clean = clean_and_adjust_cbs(cbs)
+    cbs_imputed = impute_woz_with_regression(cbs_clean)
+    cbs_full = adjust_negative_values(cbs_imputed)
+    return cbs_full
+```
+
+# 'Create City Stats' #Creating average sociodemographics for a given city
+
+- Create city stats
+
+
+```python
+def compute_city_stats(cbs_city):
+    """
+    Compute city-level demographic and housing statistics from CBS data.
+
+    Outputs:
+    - Total inhabitants
+    - Mean G_woz_woni (property value)
+    - Absolute sums for age and migration groups
+    - Relative percentages for age and migration groups
+    - Returns result as a one-row DataFrame
+    """
+    total_inhab = cbs_city['A_inhab'].sum()
+    mean_woz = round(cbs_city['G_woz_woni'].mean(), 2)
+
+    # absolute sums
+    age_cols = ['A_0_15', 'A_15_25', 'A_25_45', 'A_45_65', 'A_65+']
+    mig_cols = ['A_nederlan', 'A_west_mig', 'A_n_west_m']
+    age_sums = cbs_city[age_cols].sum()
+    mig_sums = cbs_city[mig_cols].sum()
+
+    # calculate and round percentages
+    pct_age = (age_sums / total_inhab * 100).round(2)
+    pct_mig = (mig_sums / total_inhab * 100).round(2)
+
+    stats = pd.DataFrame([{
+        'Area': 'Amsterdam',
+        'A_inhab': total_inhab,
+        'G_woz_woni': mean_woz,
+        **age_sums.to_dict(),
+        **mig_sums.to_dict(),
+        'P_0_15': pct_age['A_0_15'],
+        'P_15_25': pct_age['A_15_25'],
+        'P_25_45': pct_age['A_25_45'],
+        'P_45_65': pct_age['A_45_65'],
+        'P_65+': pct_age['A_65+'],
+        'P_nederlan': pct_mig['A_nederlan'],
+        'P_west_mig': pct_mig['A_west_mig'],
+        'P_n_west_m': pct_mig['A_n_west_m'],
+    }])
+
+    return stats
+  ```
 
 
 
