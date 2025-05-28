@@ -531,9 +531,9 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
 ```
 
 
-![mig1](images/04_prep_mig1.png)
-![mig2](images/04_prep_mig2.png)
-![mig3](images/04_prep_mig3.png)
+![mig1](images/05_prep_mig1.png)
+![mig2](images/05_prep_mig2.png)
+![mig3](images/05_prep_mig3.png)
 
 # 'Group by points with CVB and calcualte freqency' # group by points with CBS data # get frequency of points in CBS data
 
