@@ -530,7 +530,6 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
     return closest_all, fairness_lines_fig, top_fair_lines_fig
 ```
 
-
 ![mig1](images/05_prep_mig1.png)
 ![mig2](images/05_prep_mig2.png)
 ![mig3](images/05_prep_mig3.png)
