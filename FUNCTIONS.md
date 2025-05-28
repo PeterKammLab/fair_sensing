@@ -334,5 +334,256 @@ def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolate
 
 ![CBS Data Processing Overview](images/03_prep_not_snapped.png)
 ![CBS Data Processing Overview](images/03_prep_snapped.png)
+![CBS Data Processing Overview](images/03_prep_snapped_table.png)
 
+# 'Master Function Analysis and Visualisation Lines' # # snap points to lines / routes
+
+#### INPUT DATA: Public Transport Data Lines City 
+#### INPUT DATA: CBS Full Dataset
+
+```python
+
+def lines_analysis(transport_gdf, cbs_gdf, buffer_distance = 50, line_number=None, transport_type=None, crs='EPSG:28992'):
+    """
+    Master pipeline for processing transport and CBS data.
+
+    Parameters:
+    - transport_filepath : path to transport data file
+    - cbs_filepath : path to CBS shapefile
+    - buffer_distance : buffer size in meters
+    - line_number : specific line number(s) to filter (optional)
+    - transport_type : filter by transport mode (optional)
+    - crs : coordinate reference system for processing (default 'EPSG:28992')
+
+    Returns:
+    - sums_df : DataFrame comparing sums between total and sensed areas
+    - gdf_projected : filtered and projected transport GeoDataFrame
+    - cbs_gdf : CBS GeoDataFrame
+    - joined_gdf : CBS joined with transport buffer
+    - average_stats : normalized summary statistics
+    """
+
+    # Step 1: Read and project transport data
+    gdf_projected = read_and_project_transport_data(
+        transport_gdf,
+        line_numbers=line_number,
+        crs=crs,
+        transport_type=transport_type
+    )
+
+    # Step 2: Calculate buffer
+    gdf_meters = calculate_buffer(gdf_projected, buffer_distance, crs)
+
+    # Step 4: Perform spatial join
+    joined_gdf = spatial_join_and_remove_duplicates(cbs_gdf, gdf_meters)
+
+    # Step 5: Generate summary statistics
+    stats_ams = generate_summary_statistics(cbs_gdf)
+    stats_sensed = generate_summary_statistics(joined_gdf, 'Sensed Area')
+
+    # Step 6: Concatenate summary statistics
+    summary_df = concatenate_dataframes([stats_ams, stats_sensed])
+
+    # Step 7: Calculate and compare sums
+    sums_df = calculate_and_compare_sums(cbs_gdf, joined_gdf)
+
+    # Step 8: Normalize statistics
+    average_stats = normalize_statistics(summary_df)
+
+    return sums_df, gdf_meters, cbs_gdf, gdf_projected, joined_gdf, average_stats
+```
+```
+def lines_visualisation(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, sums_df, average_stats, buffer_distance = 50, transport_type=None, line_number=None):
+    """
+    Master function for visualizing data comparisons.
+
+    """
+    # Plot the map
+    fig1 = plot_transport_and_population(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, buffer_distance, transport_type=None)
+    
+    # Plot sums and percentages stacked
+    fig2 = plot_stacked_sums(sums_df, buffer_distance)
+    
+    # Plot pp difference
+    fig3 = plot_comparison_difference(average_stats)
+
+    # Plot pie chart comaprison 
+    fig4 = plot_pie_charts(average_stats)
+
+    return fig1, fig2, fig3, fig4
+```
+
+![fig1](images/04_prep_fig1.png)
+![fig2](images/04_prep_fig2.png)
+![fig3](images/04_prep_fig3.png)
+![fig4](images/04_prep_fig4.png)
+
+# 'Add Stats for each LINE' # # snap points to lines / routes
+
+#### INPUT DATA: Public Transport Data Lines City 
+#### INPUT DATA: CBS Full Dataset
+
+
+```python
+
+def line_statistics_pipeline(gdf_projected, transport_gdf, cbs_gdf, buffer_distance=50, crs='EPSG:28992'):
+    """
+    Full pipeline to process line statistics:
+    1. Aggregate line statistics.
+    2. Extract city-level statistics.
+    3. Calculate inhabitants per line.
+    4. Prepare average line statistics.
+
+    Parameters:
+    - gdf_projected : filtered transport GeoDataFrame
+    - transport_filepath : path to transport data file
+    - cbs_filepath : path to CBS shapefile
+    - buffer_distance : buffer size (default 50)
+    - crs : coordinate reference system (default EPSG:28992)
+
+    Returns:
+    - lines_stats : final prepared average line statistics DataFrame
+    """
+
+
+    # Step 2: Aggregate line statistics
+    lines_stats_df = aggregate_line_stats(
+        gdf_projected,
+        transport_gdf,
+        cbs_gdf,
+        buffer_distance
+    )
+
+    # Step 3: Calculate city-level stats
+    average_stats = normalize_statistics(generate_summary_statistics(cbs_gdf))
+    city_stats_df = average_stats.loc[average_stats.index == 0]
+
+    # Step 4: Calculate inhabitants per line
+    inhabitants_line = inhabitants_by_route(
+        gdf_projected,
+        cbs_gdf,
+        buffer_distance=buffer_distance,
+        crs=crs
+    )
+
+    # Step 5: Prepare average line statistics
+    lines_stats = prepare_lines_average(
+        lines_stats_df,
+        city_stats_df,
+        inhabitants_line
+    )
+    return lines_stats
+```
+
+# 'LINES FAIRNESS CALCULATION AND PLOTS' # For only migration or for all 
+
+#### INPUT DATA: City Border 
+#### INPUT DATA: Public Transport Lines 
+#### INPUT DATA: Average Line Stats 
+
+- For Migration
+```python
+def migration_fairness_lines(lines_average_df, lines_gdf, ams_gdf, top_n=5, columns = None):
+    """
+    Pipeline for migration fairness analysis:
+    1. Scatter plot of migration groups.
+    2. Find closest lines based on migration composition.
+    3. Plot fairness map (all lines).
+    4. Plot top N fairest lines.
+    """
+
+    # Step 1: Scatter plot of migration background
+    migration_plot_fig = plot_migration_scatter(lines_average_df)
+
+    # Step 2: Find closest lines (migration-based)
+    closest_mig = find_closest_lines_migration(lines_average_df)
+
+    # Step 3: Plot fairness map (all lines)
+    fairness_lines_mig_fig = plot_line_fairness(closest_mig, lines_gdf, ams_gdf, columns)
+
+    # Step 4: Plot top N fairest lines
+    top_fair_lines_mig_fig = plot_top_closest_lines(closest_mig, lines_gdf, ams_gdf, top_n, columns)
+
+    return closest_mig, migration_plot_fig, fairness_lines_mig_fig, top_fair_lines_mig_fig
+```
+- For all
+  
+```python
+def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  top_n=10):
+    """
+    Pipeline for overall fairness analysis (all attributes: age, migration, WOZ):
+    1. Find closest lines based on full socio-demographic and housing profile.
+    2. Plot fairness map (all lines).
+    3. Plot top N fairest lines.
+
+    """
+
+    # Step 1: Find closest lines (full attribute profile)
+    closest_all = find_closest_lines_all(lines_average_df)
+
+    # Step 2: Plot fairness map (all lines)
+    fairness_lines_fig = plot_line_fairness(closest_all, lines_gdf, ams_gdf, columns)
+
+    # Step 3: Plot top N fairest lines
+    top_fair_lines_fig = plot_top_closest_lines(closest_all, lines_gdf, ams_gdf, top_n=top_n, columns = columns)
+
+    return closest_all, fairness_lines_fig, top_fair_lines_fig
+```
+
+
+![mig1](images/04_prep_mig1.png)
+![mig2](images/04_prep_mig2.png)
+![mig3](images/04_prep_mig3.png)
+
+# 'Group by points with CVB and calcualte freqency' # group by points with CBS data # get frequency of points in CBS data
+
+### INPUT DATA: CBS_GDF FULL CLEANED
+### INPUT DATA: POINTS_SNAPPED (Agency, Timeframe)
+### OUTPUT DATA: GRUOPED BY POINTS (CBS lists, intervals)
+### OUTPUT DATA  CBS INTERVAL COUNS (Per CBS)
+
+#### Group by GTFS realtime Points
+- Grouped by ID and for each list of covering (with buffer) CBS cells
+
+#### Add Interval column for time
+
+
+grouped_by_points_GVB, cbs_interval_counts_GVB = process_realtime_with_cbs(full_cbs, snapped_realtime) 
+
+```python
+def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.GeoDataFrame, buffer_size: float = 50):
+    """
+    Full in-memory pipeline to process realtime snapped points to CBS aggregation.
+
+    Steps:
+    1. Prepare points and assign IDs.
+    2. Create buffer around points.
+    3. Perform spatial join to find intersections with CBS cells.
+    4. Finalize intersections (add geometry, intervals).
+    5. Group by CBS cells and intervals.
+
+    Parameters:
+    - gdf_cbs : GeoDataFrame of CBS cells with 'crs28992' and 'geometry'
+    - points_realtime : GeoDataFrame of snapped points
+    - buffer_size : buffer distance in meters (default 50)
+
+    Returns:
+    - grouped_by_points : DataFrame with intersected points, intervals, geometry
+    - cbs_interval_counts : GeoDataFrame with counts per CBS cell and intervals
+    """
+
+    points_prepared = prepare_points_for_join(gdf_cbs, points_realtime)
+    buffer = create_buffer(points_prepared, buffer_size)
+    intersected_points = spatial_join_intersections(buffer, gdf_cbs)
+    grouped_by_points = finalize_intersections(intersected_points, points_prepared)
+    cbs_interval_counts = group_points_by_cbs_and_intervals(intersected_points, gdf_cbs)
+
+    return grouped_by_points, cbs_interval_counts
+```
+
+Grouped by Point Dataframe 
+![final1](images/006_prep_grouped_point.png)
+
+Interval Count per CBS cell
+![final2](images/06_prep_interval_count_CBS)
 
