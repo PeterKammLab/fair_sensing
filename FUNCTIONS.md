@@ -582,8 +582,8 @@ def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.Ge
 ```
 
 Grouped by Point Dataframe 
-![final1](images/006_prep_grouped_point.png)
+![final1](images/06_prep_grouped_point.png)
 
 Interval Count per CBS cell
-![final2](images/06_prep_interval_count_CBS)
+![final2](images/06_prep_interval_count_CBS.png)
 
