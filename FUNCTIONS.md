@@ -475,6 +475,8 @@ def line_statistics_pipeline(gdf_projected, transport_gdf, cbs_gdf, buffer_dista
     return lines_stats
 ```
 
+![lines_avg](images/05_prep_lines_table.png)
+
 # 'LINES FAIRNESS CALCULATION AND PLOTS' # For only migration or for all 
 
 #### INPUT DATA: City Border 
