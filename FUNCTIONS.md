@@ -115,6 +115,8 @@ def compute_city_stats(cbs_city):
     return stats
   ```
 
+![CBS Data Processing Overview](images/02_prep_Amsterdam Stats.png)
+
 
 
 
