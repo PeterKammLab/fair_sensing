@@ -66,6 +66,8 @@ def final_cbs_pipeline(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return cbs_full
 ```
 
+![CBS Data Processing Overview](images/01_prep_full_CBS.png)
+
 # 'Create City Stats' #Creating average sociodemographics for a given city
 
 - Create city stats
