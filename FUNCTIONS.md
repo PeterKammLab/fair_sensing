@@ -531,9 +531,9 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
 
     return closest_all, fairness_lines_fig, top_fair_lines_fig
 ```
-![mignew1](images/05_prep_mig1.png)
-![mignew2](images/05_prep_mig2.png)
-![mignew3](images/05_prep_mig3.png)
+![mignewp1](images/05_prep_mignew1.png)
+![mignewp2](images/05_prep_mignew2.png)
+![mignewp3](images/05_prep_mignew3.png)
 
 # 'Group by points with CVB and calcualte freqency' # group by points with CBS data # get frequency of points in CBS data
 
