@@ -119,5 +119,61 @@ def compute_city_stats(cbs_city):
 ![CBS Data Processing Overview](images/02_prep_Amsterdam_Stats.png)
 
 
+# 'Merge and Interpolate Static and Realtime Data' # merge interpolate static and realtime, lines/vehicles statistics for 5 seconds intervals 
 
+### RAW DATA INPUT: GTFS NL STATIC 
+### RAW DATA INPUT: GTFS REALTIME NL (e.g. FOR ONE WEEK)
+### DATA OUTPUT: GTFS REALTIME MERGED FOR ONE AGENCY (e.g. GVB)
+
+```python
+def process_gtfs_pipeline(gtfs_realtime_df: pd.DataFrame, gtfs_zip_path: str,
+                                    start_timestamp: pd.Timestamp, end_timestamp: pd.Timestamp,
+                                    agency_id: str = 'GVB') -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.Series, pd.DataFrame]:
+    """
+    Complete in-memory GTFS pipeline:
+    1. Filter GTFS real-time to one day and print stats
+    2. Merge real-time GTFS with static routes.txt
+    3. Filter by agency and route_type
+    4. Split on GPS jumps
+    5. Interpolate GPS traces
+
+
+    Parameters:
+    - gtfs_realtime_df : full GTFS real-time DataFrame
+    - gtfs_zip_path    : static GTFS zip file path
+    - start_timestamp  : e.g. pd.Timestamp('2024-03-15 05:30:00')
+    - end_timestamp    : e.g. pd.Timestamp('2024-03-16 05:29:59')
+    - agency_id        : GTFS agency_id to include (default 'GVB')
+
+    Returns:
+    - final_gdf        : GeoDataFrame in EPSG:28992
+    - unique_day       : np.ndarray of dates
+    - points_per_day   : pd.Series of counts per date
+    - min_max_per_day  : pd.DataFrame with min/max per date
+    """
+    # 1. Filter real-time GTFS and print date info
+    unique_day, points_per_day, min_max_per_day, filtered_realtime = filter_gtfs_realtime(
+        gtfs_realtime_df, start_timestamp, end_timestamp
+    )
+
+    # 2. Merge with static and filter agency/route_type
+    gdf_gvb = enrich_and_filter_gtfs_data(filtered_realtime, gtfs_zip_path, agency_id_filter=agency_id)
+
+    # 3. Split traces by GPS jumps
+    gdf_gvb = apply_split_and_count_route_types(gdf_gvb)
+
+    # 4. Interpolate traces
+    interpolated_df = run_interpolation_on_traces(gdf_gvb)
+
+    final_gdf = interpolated_df.copy() 
+
+    return final_gdf, unique_day, points_per_day, min_max_per_day
+```
+
+# 'Crate Public Transport Lines' # # create public lines from GTFS data
+
+### RAW DATA INPUT: GTFS NL STATIC 
+### DATA OUTPUT: PUBLIC TRANSPORT LINES AGENCY / TYPE (e.g. GVB, bus, tram)
+
+![CBS Data Processing Overview](images/02_prep_lines.png)
 
