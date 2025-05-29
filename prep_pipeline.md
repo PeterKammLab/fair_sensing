@@ -95,7 +95,7 @@ def compute_city_stats(cbs_city):
 
     return stats
   ```
-![CBS Data Processing Overview](images/02_prep_Amsterdam_Stats.png)
+![CBS Data Processing Overview](images/01prep02.png)
 
 
 ## 'Merge and Interpolate Static and Realtime Data'
@@ -204,7 +204,7 @@ def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolate
 
 ![CBS Data Processing Overview](images/03_prep_not_snapped.png)
 ![CBS Data Processing Overview](images/03_prep_snapped.png)
-![CBS Data Processing Overview](images/03_prep_snapped_table.png)
+![CBS Data Processing Overview](images/01prep04.png)
 
 ## 'Master Function Analysis and Visualisation Lines'  
 
@@ -292,7 +292,7 @@ def line_statistics_pipeline(gdf_projected, transport_gdf, cbs_gdf, buffer_dista
     return lines_stats
 ```
 
-![lines_avg](images/05_prep_lines_table.png)
+![lines_avg](images/01prep03.png)
 
 ## 'LINES FAIRNESS CALCULATION AND PLOTS' 
 
@@ -373,8 +373,8 @@ def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.Ge
 ```
 
 Grouped by Point Dataframe 
-![final1](images/06_prep_grouped_point.png)
+![final1](images/01prep05.png)
 
 Interval Count per CBS cell
-![final2](images/06_prep_interval_count_CBS.png)
+![final2](images/01prep06.png)
 
