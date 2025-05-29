@@ -22,7 +22,9 @@ buffer_distance = 50  # Buffer distance in meters
 
 # PROCESS
 
-##  'Cleaning CBS data' # here we had to shorten column names in functio definition
+##  'Cleaning CBS data'
+
+- Here we had to shorten column names in functio definition
 
 
 ### RAW DATA INPUT: CBS 100x100 NL / CITY BORDER
@@ -68,9 +70,11 @@ def final_cbs_pipeline(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 ![CBS Data Processing Overview](images/01_prep_full_CBS.png)
 
-## 'Create City Stats' #Creating average sociodemographics for a given city
+## 'Create City Stats' 
 
+- Creating average sociodemographics for a given city
 - Create city stats
+  
 ### INPUT DATA: CBS FULLY CLEANED  
 
 ```python
@@ -94,7 +98,9 @@ def compute_city_stats(cbs_city):
 ![CBS Data Processing Overview](images/02_prep_Amsterdam_Stats.png)
 
 
-## 'Merge and Interpolate Static and Realtime Data' # merge interpolate static and realtime, lines/vehicles statistics for 5 seconds intervals 
+## 'Merge and Interpolate Static and Realtime Data'
+
+- Merge interpolate static and realtime, lines/vehicles statistics for 5 seconds intervals 
 
 ### RAW DATA INPUT: GTFS NL STATIC 
 ### RAW DATA INPUT: GTFS REALTIME NL (e.g. FOR ONE WEEK)
@@ -126,26 +132,16 @@ def process_gtfs_pipeline(gtfs_realtime_df: pd.DataFrame, gtfs_zip_path: str,
     - points_per_day   : pd.Series of counts per date
     - min_max_per_day  : pd.DataFrame with min/max per date
     """
-    # 1. Filter real-time GTFS and print date info
-    unique_day, points_per_day, min_max_per_day, filtered_realtime = filter_gtfs_realtime(
-        gtfs_realtime_df, start_timestamp, end_timestamp
-    )
-
-    # 2. Merge with static and filter agency/route_type
-    gdf_gvb = enrich_and_filter_gtfs_data(filtered_realtime, gtfs_zip_path, agency_id_filter=agency_id)
-
-    # 3. Split traces by GPS jumps
-    gdf_gvb = apply_split_and_count_route_types(gdf_gvb)
-
-    # 4. Interpolate traces
-    interpolated_df = run_interpolation_on_traces(gdf_gvb)
-
-    final_gdf = interpolated_df.copy() 
+    # ...
+    # ...
+    # ...
 
     return final_gdf, unique_day, points_per_day, min_max_per_day
 ```
 
-# 'Crate Public Transport Lines' # # create public lines from GTFS data
+## 'Crate Public Transport Lines' 
+
+- Create public lines from GTFS data
 
 ### RAW DATA INPUT: GTFS NL STATIC 
 ### DATA OUTPUT: PUBLIC TRANSPORT LINES AGENCY / TYPE (e.g. GVB, bus, tram)
@@ -156,77 +152,16 @@ def process_gtfs_pipeline(gtfs_realtime_df: pd.DataFrame, gtfs_zip_path: str,
 #              and returns GeoDataFrames for tram, bus, night-bus, and all public transport.
 
 def extract_public_lines(gtfs_zip_path: str, agency_id: str = 'GVB'):
-    # 1) Read GTFS static files from zip
-    with ZipFile(gtfs_zip_path) as z:
-        df_shapes = pd.read_csv(z.open("shapes.txt"), dtype={
-            'shape_id': 'str',
-            'shape_pt_lat': 'float',
-            'shape_pt_lon': 'float',
-            'shape_pt_sequence': 'Int64',
-            'shape_dist_traveled': 'float',
-        })
-        df_routes = pd.read_csv(z.open("routes.txt"), dtype={
-            'route_id': 'str',
-            'agency_id': 'str',
-            'route_short_name': 'str',
-            'route_long_name': 'str',
-            'route_desc': 'str',
-            'route_type': 'Int64',
-            'route_color': 'str',
-            'route_text_color': 'str',
-            'exact_times': 'bool'
-        })
-        df_trips = pd.read_csv(z.open("trips.txt"), dtype={
-            'route_id': 'str',
-            'service_id': 'str',
-            'trip_id': 'str',
-            'shape_id': 'str',
-            'trip_headsign': 'str',
-            'direction_id': 'str',
-            'block_id': 'str',
-            'wheelchair_accessible': 'str',
-            'route_direction': 'str',
-            'trip_note': 'str',
-            'bikes_allowed': 'str'
-        })
-
-    # 2) Build GeoDataFrame of shapes
-    df_shapes['geometry'] = gpd.points_from_xy(df_shapes['shape_pt_lon'], df_shapes['shape_pt_lat'])
-    # group into LineStrings per shape_id
-    grouped = df_shapes.groupby('shape_id')['geometry'].agg(list)
-    grouped = grouped[grouped.map(len) > 1].to_frame()
-    grouped['geometry'] = grouped['geometry'].apply(LineString)
-    gdf_shapes = gpd.GeoDataFrame(grouped, geometry='geometry', crs="EPSG:4326")
-    # reproject to RD New
-    gdf_shapes = gdf_shapes.to_crs("EPSG:28992")
-
-    # 3) Prepare route info
-    df_route_meta = df_routes[['route_id','route_type','route_short_name','agency_id']].drop_duplicates()
-    df_trip_meta = df_trips[['route_id','shape_id']].drop_duplicates()
-    df_trip_meta = df_trip_meta.merge(df_route_meta, on='route_id', how='left')
-
-    # 4) Merge shapes with trip metadata
-    gdf = gdf_shapes.merge(df_trip_meta, left_index=True, right_on='shape_id', how='left')
-
-    # 5) Filter for agency and modes
-    gdf_agency = gdf[gdf['agency_id'] == agency_id]
-
-    # tram: route_type == 0
-    tram_gdf = gdf_agency[gdf_agency['route_type'] == 0]
-    tram_unique = tram_gdf.drop_duplicates(subset='route_short_name').reset_index(drop=True)
-
-    # bus: route_type == 3
-    bus_gdf = gdf_agency[gdf_agency['route_type'] == 3]
-    bus_unique = bus_gdf.drop_duplicates(subset='route_short_name').reset_index(drop=True)
-
-    # night bus: short_name startswith 'N'
-    bus_night_unique = bus_unique[bus_unique['route_short_name'].str.startswith('N')].reset_index(drop=True)
-
-    # day bus: the rest
-    bus_day_unique = bus_unique[~bus_unique['route_short_name'].str.startswith('N')].reset_index(drop=True)
-
-    # public transport = trams + all buses
-    public_transport = pd.concat([tram_unique, bus_unique], ignore_index=True)
+ """
+    1 Read GTFS static files from zip
+    2 Build GeoDataFrame of shapes
+    3 Prepare route info
+    4 Merge shapes with trip metadata
+    5 Filter for agency and modes
+ """
+    # ...
+    # ...
+    # ...
 
     return public_transport, tram_unique, bus_unique, bus_day_unique, bus_night_unique
 
@@ -234,7 +169,9 @@ def extract_public_lines(gtfs_zip_path: str, agency_id: str = 'GVB'):
 
 ![CBS Data Processing Overview](images/02_prep_lines.png)
 
-# 'Snap Realtime Data Points' # # snap points to lines / routes
+## 'Snap Realtime Data Points' 
+
+- Snap interpolated GTFS points (buses and trams) to their nearest GVB route lines in Amsterdam.
 
 #### INPUT DATA: Public Transport Data Lines City 
 #### INPUT DATA: Interpolated Realtime Data Agency Time 
@@ -244,7 +181,11 @@ def extract_public_lines(gtfs_zip_path: str, agency_id: str = 'GVB'):
 
 def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolated_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Snap interpolated GTFS points (buses and trams) to their nearest GVB route lines in Amsterdam.
+    1 Reproject interpolated data to match routes CRS
+    2 Split by mode
+    3 Plot row data
+    4 Snap trams, snap busses
+    5 Combine and plot snapped
 
     Parameters:
     - routes_gdf         : GeoDataFrame of public transport routes (must include 'route_type')
@@ -253,55 +194,9 @@ def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolate
     Returns:
     - GeoDataFrame of snapped GTFS points (deduplicated), projected in same CRS as routes_gdf
     """
-
-    # Reproject interpolated data to match routes CRS
-    interpolated_gdf = interpolated_gdf.to_crs(routes_gdf.crs)
-
-    # Split by mode
-    interpolated_trams = interpolated_gdf[interpolated_gdf['route_type'] == 0]
-    interpolated_buses = interpolated_gdf[interpolated_gdf['route_type'] == 3]
-
-    routes_trams = routes_gdf[routes_gdf['route_type'] == 0]
-    routes_buses = routes_gdf[routes_gdf['route_type'] == 3]
-
-    # Plot raw data
-    fig, ax = plt.subplots(figsize=(10, 10))
-    routes_gdf.plot(ax=ax, color='black', linewidth=0.5)
-    interpolated_gdf.plot(ax=ax, color='red', linewidth=0.5, markersize=0.2)
-    plt.title('Routes and Interpolated GTFS Points')
-
-    def snap_points(points_gdf, lines_gdf):
-        joined = gpd.sjoin_nearest(points_gdf, lines_gdf, how="inner", distance_col="dist")
-        snapped = []
-        for i, row in joined.iterrows():
-            if (i + 1) % 1000 == 0:
-                print(f"Processed {i + 1} values")
-            road = lines_gdf.loc[int(row['index_right'])].geometry
-            proj = road.project(row.geometry)
-            snapped_point = road.interpolate(proj)
-            snapped.append(snapped_point)
-        joined['geometry'] = snapped
-        return joined.drop(columns=['index_right', 'dist'])
-
-    # Snap trams
-    final_trams = snap_points(interpolated_trams, routes_trams)
-    final_trams = final_trams[['new_timest', 'new_lat', 'new_lon', 'uni_id', 'route_id_left', 'trip_id', 'route_type_left', 'geometry']]
-
-    # Snap buses
-    final_buses = snap_points(interpolated_buses, routes_buses)
-    final_buses = final_buses[['new_timest', 'new_lat', 'new_lon', 'uni_id', 'route_id_left', 'trip_id', 'route_type_left', 'geometry']]
-
-    # Combine
-    snapped = gpd.GeoDataFrame(pd.concat([final_buses, final_trams], ignore_index=True), crs=routes_gdf.crs)
-
-    # Drop duplicates
-    snapped = snapped.drop_duplicates(subset=['new_lat', 'new_lon', 'new_timest', 'uni_id'], keep='first')
-
-    # Plot snapped
-    fig, ax = plt.subplots(figsize=(10, 10))
-    routes_gdf.plot(ax=ax, color='black', linewidth=0.5)
-    snapped.plot(ax=ax, color='red', linewidth=0.5, markersize=0.2)
-    plt.title('Roads and Snapped GTFS Points')
+    #...
+    #...
+    #...
 
     return snapped
 
@@ -311,7 +206,9 @@ def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolate
 ![CBS Data Processing Overview](images/03_prep_snapped.png)
 ![CBS Data Processing Overview](images/03_prep_snapped_table.png)
 
-# 'Master Function Analysis and Visualisation Lines' # # snap points to lines / routes
+## 'Master Function Analysis and Visualisation Lines'  
+
+- Master pipeline for processing transport and CBS data.
 
 #### INPUT DATA: Public Transport Data Lines City 
 #### INPUT DATA: CBS Full Dataset
@@ -320,7 +217,13 @@ def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolate
 
 def lines_analysis(transport_gdf, cbs_gdf, buffer_distance = 50, line_number=None, transport_type=None, crs='EPSG:28992'):
     """
-    Master pipeline for processing transport and CBS data.
+    1 Read and project transport data
+    2 Calculate buffer
+    3 Perform spatial join
+    4 Generate summary statistics
+    5 Concatenate summary statistics
+    6 Calculate and compare sums
+    7 Normalize statistics
 
     Parameters:
     - transport_filepath : path to transport data file
@@ -337,53 +240,20 @@ def lines_analysis(transport_gdf, cbs_gdf, buffer_distance = 50, line_number=Non
     - joined_gdf : CBS joined with transport buffer
     - average_stats : normalized summary statistics
     """
-
-    # Step 1: Read and project transport data
-    gdf_projected = read_and_project_transport_data(
-        transport_gdf,
-        line_numbers=line_number,
-        crs=crs,
-        transport_type=transport_type
-    )
-
-    # Step 2: Calculate buffer
-    gdf_meters = calculate_buffer(gdf_projected, buffer_distance, crs)
-
-    # Step 4: Perform spatial join
-    joined_gdf = spatial_join_and_remove_duplicates(cbs_gdf, gdf_meters)
-
-    # Step 5: Generate summary statistics
-    stats_ams = generate_summary_statistics(cbs_gdf)
-    stats_sensed = generate_summary_statistics(joined_gdf, 'Sensed Area')
-
-    # Step 6: Concatenate summary statistics
-    summary_df = concatenate_dataframes([stats_ams, stats_sensed])
-
-    # Step 7: Calculate and compare sums
-    sums_df = calculate_and_compare_sums(cbs_gdf, joined_gdf)
-
-    # Step 8: Normalize statistics
-    average_stats = normalize_statistics(summary_df)
-
     return sums_df, gdf_meters, cbs_gdf, gdf_projected, joined_gdf, average_stats
 ```
-```
+
+- Master function for visualizing data comparisons.
+
+```python
 def lines_visualisation(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, sums_df, average_stats, buffer_distance = 50, transport_type=None, line_number=None):
     """
-    Master function for visualizing data comparisons.
+    1 Plot the map (fig1)
+    2 Plot sums and percentages stacked (fig2)   
+    3 Plot pp difference (fig3)
+    4 Plot pie chart comaprison (fig4)
 
     """
-    # Plot the map
-    fig1 = plot_transport_and_population(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, buffer_distance, transport_type=None)
-    
-    # Plot sums and percentages stacked
-    fig2 = plot_stacked_sums(sums_df, buffer_distance)
-    
-    # Plot pp difference
-    fig3 = plot_comparison_difference(average_stats)
-
-    # Plot pie chart comaprison 
-    fig4 = plot_pie_charts(average_stats)
 
     return fig1, fig2, fig3, fig4
 ```
@@ -393,10 +263,10 @@ def lines_visualisation(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, sums_df, av
 ![fig3](images/04_prep_fig3.png)
 ![fig4](images/04_prep_fig4.png)
 
-# 'Add Stats for each LINE' # # snap points to lines / routes
+## 'Add Stats for each Line'
 
-#### INPUT DATA: Public Transport Data Lines City 
-#### INPUT DATA: CBS Full Dataset
+### INPUT DATA: Public Transport Data Lines City 
+### INPUT DATA: CBS Full Dataset
 
 
 ```python
@@ -419,46 +289,21 @@ def line_statistics_pipeline(gdf_projected, transport_gdf, cbs_gdf, buffer_dista
     Returns:
     - lines_stats : final prepared average line statistics DataFrame
     """
-
-
-    # Step 2: Aggregate line statistics
-    lines_stats_df = aggregate_line_stats(
-        gdf_projected,
-        transport_gdf,
-        cbs_gdf,
-        buffer_distance
-    )
-
-    # Step 3: Calculate city-level stats
-    average_stats = normalize_statistics(generate_summary_statistics(cbs_gdf))
-    city_stats_df = average_stats.loc[average_stats.index == 0]
-
-    # Step 4: Calculate inhabitants per line
-    inhabitants_line = inhabitants_by_route(
-        gdf_projected,
-        cbs_gdf,
-        buffer_distance=buffer_distance,
-        crs=crs
-    )
-
-    # Step 5: Prepare average line statistics
-    lines_stats = prepare_lines_average(
-        lines_stats_df,
-        city_stats_df,
-        inhabitants_line
-    )
     return lines_stats
 ```
 
 ![lines_avg](images/05_prep_lines_table.png)
 
-# 'LINES FAIRNESS CALCULATION AND PLOTS' # For only migration or for all 
+## 'LINES FAIRNESS CALCULATION AND PLOTS' 
 
-#### INPUT DATA: City Border 
-#### INPUT DATA: Public Transport Lines 
-#### INPUT DATA: Average Line Stats 
+- Only for migration or for all (including migration, age and WOZ value) 
+
+### INPUT DATA: City Border  
+### INPUT DATA: Public Transport Lines 
+### INPUT DATA: Average Line Stats 
 
 - For Migration
+- 
 ```python
 def migration_fairness_lines(lines_average_df, lines_gdf, ams_gdf, top_n=5, columns = None):
     """
@@ -468,19 +313,6 @@ def migration_fairness_lines(lines_average_df, lines_gdf, ams_gdf, top_n=5, colu
     3. Plot fairness map (all lines).
     4. Plot top N fairest lines.
     """
-
-    # Step 1: Scatter plot of migration background
-    migration_plot_fig = plot_migration_scatter(lines_average_df)
-
-    # Step 2: Find closest lines (migration-based)
-    closest_mig = find_closest_lines_migration(lines_average_df)
-
-    # Step 3: Plot fairness map (all lines)
-    fairness_lines_mig_fig = plot_line_fairness(closest_mig, lines_gdf, ams_gdf, columns)
-
-    # Step 4: Plot top N fairest lines
-    top_fair_lines_mig_fig = plot_top_closest_lines(closest_mig, lines_gdf, ams_gdf, top_n, columns)
-
     return closest_mig, migration_plot_fig, fairness_lines_mig_fig, top_fair_lines_mig_fig
 ```
 - For all
@@ -494,23 +326,16 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
     3. Plot top N fairest lines.
 
     """
-
-    # Step 1: Find closest lines (full attribute profile)
-    closest_all = find_closest_lines_all(lines_average_df)
-
-    # Step 2: Plot fairness map (all lines)
-    fairness_lines_fig = plot_line_fairness(closest_all, lines_gdf, ams_gdf, columns)
-
-    # Step 3: Plot top N fairest lines
-    top_fair_lines_fig = plot_top_closest_lines(closest_all, lines_gdf, ams_gdf, top_n=top_n, columns = columns)
-
     return closest_all, fairness_lines_fig, top_fair_lines_fig
 ```
 ![mignewp1](images/05_prep_mignew1.png)
 ![mignewp2](images/05_prep_mignew2.png)
 ![mignewp3](images/05_prep_mignew3.png)
 
-# 'Group by points with CVB and calcualte freqency' # group by points with CBS data # get frequency of points in CBS data
+## 'Group by points with CVB and calcualte freqency' 
+
+
+
 
 ### INPUT DATA: CBS_GDF FULL CLEANED
 ### INPUT DATA: POINTS_SNAPPED (Agency, Timeframe)
@@ -521,9 +346,7 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
 - Grouped by ID and for each list of covering (with buffer) CBS cells
 
 #### Add Interval column for time
-
-
-grouped_by_points_GVB, cbs_interval_counts_GVB = process_realtime_with_cbs(full_cbs, snapped_realtime) 
+- Get frequency (amount of measurements) of points in CBS cells
 
 ```python
 def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.GeoDataFrame, buffer_size: float = 50):
@@ -546,13 +369,6 @@ def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.Ge
     - grouped_by_points : DataFrame with intersected points, intervals, geometry
     - cbs_interval_counts : GeoDataFrame with counts per CBS cell and intervals
     """
-
-    points_prepared = prepare_points_for_join(gdf_cbs, points_realtime)
-    buffer = create_buffer(points_prepared, buffer_size)
-    intersected_points = spatial_join_intersections(buffer, gdf_cbs)
-    grouped_by_points = finalize_intersections(intersected_points, points_prepared)
-    cbs_interval_counts = group_points_by_cbs_and_intervals(intersected_points, gdf_cbs)
-
     return grouped_by_points, cbs_interval_counts
 ```
 
