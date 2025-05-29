@@ -15,10 +15,8 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 **Use**: Defines the administrative boundary of Amsterdam  
 
 ### 🚍 Raw Data: GTFS (Public Transport)  
-- **Realtime data**: `data/gtfs_realtime_data_12_to_19.csv`  
+- **Realtime data**: `data/gtfs_realtime_data_12_to_19.csv` # covers one week of transit vehicle positions and route definitions.
 - **Static GTFS**: `data/gtfs-nl.zip`  
-
-Covers one week of transit vehicle positions and route definitions.
 
 ### ⚙️ Parameters  
 - **Start time**: e.g. 15 March 2024, 05:30  
@@ -31,13 +29,17 @@ Covers one week of transit vehicle positions and route definitions.
 
 # PROCESS
 
-##  'Cleaning CBS data'
+## 🧹 'Cleaning CBS Data'
 
-- Here we had to shorten column names in functio definition
+- Clip the national CBS 100×100 grid to the Amsterdam city boundary  
+- Replace invalid values (e.g. `-99997`) and remove missing data  
+- Rename columns and recalculate key demographic groups:
+  - Dutch background (`A_nederlan`)  
+  - Western migration background (`A_west_mig`)  
+  - Non-western migration background (`A_n_west_mig`)  
 
-
-### RAW DATA INPUT: CBS 100x100 NL / CITY BORDER
-### DATA OUTPUT: CBS READY GDF FOR CITY 
+### 📥 RAW DATA INPUT: CBS 100×100 NL / City Border  
+### 📤 DATA OUTPUT: Cleaned CBS GeoDataFrame for Amsterdam  
 
 ```python
 def process_cbs_data(cbs: gpd.GeoDataFrame, city: gpd.GeoDataFrame) -> tuple[gpd.GeoDataFrame, pd.DataFrame]:
