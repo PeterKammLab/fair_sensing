@@ -29,11 +29,11 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 
 # PROCESS
 
-## 🧹 'Cleaning CBS Data'
+## 🧹 Cleaning CBS Data
 
 - Clip the national CBS 100×100 grid to the Amsterdam city boundary  
 - Replace invalid values (e.g. `-99997`) and remove missing data  
-- Rename columns and recalculate key demographic groups (migration and age groups)
+- Rename columns and recalculate key demographic groups (migration groups)
 
 #### 📥 RAW DATA INPUT: CBS 100×100 NL / City Border  
 #### 📤 DATA OUTPUT: Cleaned CBS GeoDataFrame for Amsterdam  
@@ -55,12 +55,14 @@ def process_cbs_data(cbs: gpd.GeoDataFrame, city: gpd.GeoDataFrame) -> tuple[gpd
     return semi_cbs, nan_summary
 ```
 
-##  'Final CBS data wrangling' 
-- For Amsterdam cleaned, filled, predicted, for space - 
-- Ready for use
+## 🧼 Final CBS Data Wrangling
 
-### INPUT DATA: CBS SEMI CLEANED 
-### OUTPUT DATA: CBS FULLY CLEANED  
+- Impute missing property value data (WOZ)  
+- Adjust and clean remaining invalid or negative values  
+- Prepare the final CBS dataset for spatial analysis in Amsterdam  
+
+#### 📥 INPUT DATA: Semi-cleaned CBS (clipped and filtered)  
+#### 📤 OUTPUT DATA: Fully cleaned CBS GeoDataFrame ready for use  
 
 ```python
 def final_cbs_pipeline(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -78,12 +80,14 @@ def final_cbs_pipeline(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 ![CBS Data Processing Overview](images/01prep01.png)
 
-## 'Create City Stats' 
+## 📊 Create City Stats
 
-- Creating average sociodemographics for a given city
-- Create city stats
-  
-### INPUT DATA: CBS FULLY CLEANED  
+- Calculate average sociodemographic and housing indicators for the city  
+- Aggregate absolute and relative values for age and migration groups  
+- Output a single-row DataFrame with key city-level statistics  
+
+#### 📥 INPUT DATA: Fully cleaned CBS GeoDataFrame  
+#### 📤 OUTPUT DATA: One-row DataFrame with city-level stats  
 
 ```python
 def compute_city_stats(cbs_city):
@@ -106,13 +110,15 @@ def compute_city_stats(cbs_city):
 ![CBS Data Processing Overview](images/01prep02.png)
 
 
-## 'Merge and Interpolate Static and Realtime Data'
+## 🔄 Merge and Interpolate Static and Realtime Data
 
-- Merge interpolate static and realtime, lines/vehicles statistics for 5 seconds intervals 
+- Merge static and realtime GTFS data  
+- Filter, clean, and interpolate vehicle positions at 5-second intervals  
+- Prepare a complete trajectory dataset for one agency (e.g. GVB)  
 
-### RAW DATA INPUT: GTFS NL STATIC 
-### RAW DATA INPUT: GTFS REALTIME NL (e.g. FOR ONE WEEK)
-### DATA OUTPUT: GTFS REALTIME MERGED FOR ONE AGENCY (e.g. GVB)
+#### 📥 RAW DATA INPUT: GTFS NL Static + GTFS NL Realtime (1 week)  
+#### 📤 DATA OUTPUT: Merged and interpolated GTFS data for selected agency  
+
 
 ```python
 def process_gtfs_pipeline(gtfs_realtime_df: pd.DataFrame, gtfs_zip_path: str,
@@ -147,12 +153,14 @@ def process_gtfs_pipeline(gtfs_realtime_df: pd.DataFrame, gtfs_zip_path: str,
     return final_gdf, unique_day, points_per_day, min_max_per_day
 ```
 
-## 'Crate Public Transport Lines' 
+## 🛤️ Create Public Transport Lines
 
-- Create public lines from GTFS data
+- Extract and construct LineStrings from GTFS static data  
+- Merge with route and trip metadata  
+- Filter by agency and transport mode (e.g. tram, bus, night bus)  
 
-### RAW DATA INPUT: GTFS NL STATIC 
-### DATA OUTPUT: PUBLIC TRANSPORT LINES AGENCY / TYPE (e.g. GVB, bus, tram)
+#### 📥 RAW DATA INPUT: GTFS NL Static  
+#### 📤 DATA OUTPUT: Public transport lines per agency and mode (e.g. GVB, bus, tram)  
 
 ```python
 
@@ -177,13 +185,14 @@ def extract_public_lines(gtfs_zip_path: str, agency_id: str = 'GVB'):
 
 ![CBS Data Processing Overview](images/02_prep_lines.png)
 
-## 'Snap Realtime Data Points' 
+## 📌 Snap Realtime Data Points
 
-- Snap interpolated GTFS points (buses and trams) to their nearest GVB route lines in Amsterdam.
+- Match interpolated GTFS points (buses and trams) to their nearest route lines  
+- Handle snapping separately for each mode (bus/tram)  
+- Output deduplicated and cleaned snapped points for further analysis  
 
-#### INPUT DATA: Public Transport Data Lines City 
-#### INPUT DATA: Interpolated Realtime Data Agency Time 
-#### OUTPUT DATA: Snapped Realtime Data Agency Time
+#### 📥 INPUT DATA: Public transport lines (city) + Interpolated GTFS points  
+#### 📤 OUTPUT DATA: Snapped realtime GTFS data (agency, timeframe)  
 
 ```python
 
@@ -214,12 +223,14 @@ def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolate
 ![CBS Data Processing Overview](images/03_prep_snapped.png)
 ![CBS Data Processing Overview](images/01prep04.png)
 
-## 'Master Function Analysis and Visualisation Lines'  
+## 🧠 Master Function Analysis and Visualisation Lines
 
-- Master pipeline for processing transport and CBS data.
+- Master pipeline for processing transport and CBS data  
+- Perform buffer, spatial join, and generate summary and normalized statistics  
 
-#### INPUT DATA: Public Transport Data Lines City 
-#### INPUT DATA: CBS Full Dataset
+#### 📥 INPUT DATA: Public Transport Data Lines City  
+#### 📥 INPUT DATA: CBS Full Dataset  
+#### 📤 OUTPUT DATA: Comparison DataFrame, Projected Lines, CBS GDF, Joined GDF, Normalized Stats  
 
 ```python
 
@@ -251,7 +262,14 @@ def lines_analysis(transport_gdf, cbs_gdf, buffer_distance = 50, line_number=Non
     return sums_df, gdf_meters, cbs_gdf, gdf_projected, joined_gdf, average_stats
 ```
 
-- Master function for visualizing data comparisons.
+## 📊 Visualise Line-Level Comparison and Fairness
+
+- Generate visual comparisons of spatial coverage and sociodemographic statistics  
+- Includes maps, bar charts, difference plots, and pie charts  
+
+#### 📥 INPUT DATA:  Projected Transport Lines, Cleaned CBS GeoDataFrame , Joined CBS–Transport Buffer, Amsterdam City Border, Comparison DataFrame, Normalized Statistics 
+
+#### 📤 OUTPUT DATA:  Map of line coverage, Stacked bar chart of absolute and relative values, Percentage point difference plot, Pie chart comparison of shares (fig4)  
 
 ```python
 def lines_visualisation(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, sums_df, average_stats, buffer_distance = 50, transport_type=None, line_number=None):
@@ -271,11 +289,15 @@ def lines_visualisation(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, sums_df, av
 ![fig3](images/04_prep_fig3.png)
 ![fig4](images/04_prep_fig4.png)
 
-## 'Add Stats for each Line'
+## 📈 Add Stats for Each Line
 
-### INPUT DATA: Public Transport Data Lines City 
-### INPUT DATA: CBS Full Dataset
+- Calculate per-line sociodemographic statistics using spatial join  
+- Aggregate values for population, housing, and migration groups  
+- Prepare average statistics for fairness comparison  
 
+#### 📥 INPUT DATA: Public Transport Data Lines City 
+#### 📥 INPUT DATA: CBS Full Dataset
+#### 📤 OUTPUT DATA: Average Line Statistics ⟶ 
 
 ```python
 
@@ -302,16 +324,22 @@ def line_statistics_pipeline(gdf_projected, transport_gdf, cbs_gdf, buffer_dista
 
 ![lines_avg](images/01prep03.png)
 
-## 'LINES FAIRNESS CALCULATION AND PLOTS' 
+## ⚖️ Lines Fairness Calculation and Plots
 
-- Only for migration or for all (including migration, age and WOZ value) 
+- Calculate fairness by comparing each line’s profile to the city average  
+- Run analysis for migration-only or full profile (migration, age, WOZ)  
+- Generate maps and plots of the fairest lines  
 
-### INPUT DATA: City Border  
-### INPUT DATA: Public Transport Lines 
-### INPUT DATA: Average Line Stats 
+#### 📥 INPUT DATA: City Border ⟶ `ams_gdf`  
+#### 📥 INPUT DATA: Public Transport Lines ⟶ `lines_gdf`  
+#### 📥 INPUT DATA: Average Line Stats ⟶ `lines_average_df`  
 
-- For Migration
-- 
+#### 📤 OUTPUT DATA (Migration Only): Closest Matching Lines, Migration Scatter Plot, Fairness Map (Migration), Top N Fairest Lines (Migration)  
+
+#### 📤 OUTPUT DATA (Full Profile): Closest Matching Lines, Fairness Map (All Attributes), Top N Fairest Lines (All Attributes) 
+
+- **For Migration**
+  
 ```python
 def migration_fairness_lines(lines_average_df, lines_gdf, ams_gdf, top_n=5, columns = None):
     """
@@ -323,7 +351,7 @@ def migration_fairness_lines(lines_average_df, lines_gdf, ams_gdf, top_n=5, colu
     """
     return closest_mig, migration_plot_fig, fairness_lines_mig_fig, top_fair_lines_mig_fig
 ```
-- For all
+- **For all**
   
 ```python
 def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  top_n=10):
@@ -340,21 +368,15 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
 ![mignewp2](images/05_prep_mignew2.png)
 ![mignewp3](images/05_prep_mignew3.png)
 
-## 'Group by points with CVB and calcualte freqency' 
+## 📍⏱️ Group by Points with CBS and Calculate Frequency
 
+- Spatially join GTFS realtime points (with buffer) to CBS cells  
+- Group by point ID to track which CBS cells each point covers  
+- Add time intervals to compute sensing frequency per CBS cell  
 
+#### 📥 INPUT DATA: Fully Cleaned CBS GeoDataFrame, Snapped Realtime GTFS Points (Agency, Timeframe) 
 
-
-### INPUT DATA: CBS_GDF FULL CLEANED
-### INPUT DATA: POINTS_SNAPPED (Agency, Timeframe)
-### OUTPUT DATA: GRUOPED BY POINTS (CBS lists, intervals)
-### OUTPUT DATA  CBS INTERVAL COUNS (Per CBS)
-
-#### Group by GTFS realtime Points
-- Grouped by ID and for each list of covering (with buffer) CBS cells
-
-#### Add Interval column for time
-- Get frequency (amount of measurements) of points in CBS cells
+#### 📤 OUTPUT DATA: Grouped Points with Intervals, CBS Cell Counts per Time Interval 
 
 ```python
 def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.GeoDataFrame, buffer_size: float = 50):
