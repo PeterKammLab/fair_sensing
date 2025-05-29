@@ -4,23 +4,28 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 
 ---
 
-## RAW DATA & PARAMETERS 
+## RAW DATA & PARAMETERS
 
-### Raw Data Sociodemographics CBS 
-cbs_NL  = gpd.read_file("data/cbs_vk100_2021_vol.gpkg") # downloaded 2024
+### 📊 Raw Data: Sociodemographics (CBS)  
+**File**: `data/cbs_vk100_2021_vol.gpkg`  
+**Note**: Contains 100×100m population grid, downloaded in 2024
 
-### Raw Data City Border 
-city_border = gpd.read_file("data/Gemeente2.geojson") # for Amsterdam in this case 
+### 🗺️ Raw Data: City Border (Amsterdam)  
+**File**: `data/Gemeente2.geojson`  
+**Use**: Defines the administrative boundary of Amsterdam  
 
-### Raw Data GTFS
-df_realtime = pd.read_csv('data/gtfs_realtime_data_12_to_19.csv') # realtime GTFS week
-gtfs_zip_path = 'data/gtfs-nl.zip' # static GTFS data
+### 🚍 Raw Data: GTFS (Public Transport)  
+- **Realtime data**: `data/gtfs_realtime_data_12_to_19.csv`  
+- **Static GTFS**: `data/gtfs-nl.zip`  
 
-### Parameters
-start_ts = pd.Timestamp('2024-03-15 05:30:00') # start time for the analysis  
-end_ts = pd.Timestamp('2024-03-16 05:29:59') # end time for the analysis  
-agency = 'GVB' # transport provider  
-buffer_distance = 50  # Buffer distance in meters
+Covers one week of transit vehicle positions and route definitions.
+
+### ⚙️ Parameters  
+- **Start time**: e.g. 15 March 2024, 05:30  
+- **End time**: e.g. 16 March 2024, 05:29  
+- **Agency**: e.g. GVB (Amsterdam public transport)  # local transport provider 
+- **Buffer distance**: e.g. 50 meters # distance for sensing 
+
 
 ---
 
