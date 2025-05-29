@@ -297,7 +297,7 @@ def lines_visualisation(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, sums_df, av
 
 #### 📥 INPUT DATA: Public Transport Data Lines City 
 #### 📥 INPUT DATA: CBS Full Dataset
-#### 📤 OUTPUT DATA: Average Line Statistics ⟶ 
+#### 📤 OUTPUT DATA: Average Line Statistics 
 
 ```python
 
@@ -330,12 +330,8 @@ def line_statistics_pipeline(gdf_projected, transport_gdf, cbs_gdf, buffer_dista
 - Run analysis for migration-only or full profile (migration, age, WOZ)  
 - Generate maps and plots of the fairest lines  
 
-#### 📥 INPUT DATA: City Border ⟶ `ams_gdf`  
-#### 📥 INPUT DATA: Public Transport Lines ⟶ `lines_gdf`  
-#### 📥 INPUT DATA: Average Line Stats ⟶ `lines_average_df`  
-
+#### 📥 INPUT DATA: City Border, Public Transport Lines, Average Line Stats
 #### 📤 OUTPUT DATA (Migration Only): Closest Matching Lines, Migration Scatter Plot, Fairness Map (Migration), Top N Fairest Lines (Migration)  
-
 #### 📤 OUTPUT DATA (Full Profile): Closest Matching Lines, Fairness Map (All Attributes), Top N Fairest Lines (All Attributes) 
 
 - **For Migration**
@@ -375,7 +371,6 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
 - Add time intervals to compute sensing frequency per CBS cell  
 
 #### 📥 INPUT DATA: Fully Cleaned CBS GeoDataFrame, Snapped Realtime GTFS Points (Agency, Timeframe) 
-
 #### 📤 OUTPUT DATA: Grouped Points with Intervals, CBS Cell Counts per Time Interval 
 
 ```python
