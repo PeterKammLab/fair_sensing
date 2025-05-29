@@ -4,21 +4,25 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 
 ---
 
-# RAW DATA / PARAMETERS 
+## RAW DATA & PARAMETERS 
 
-### Raw Data CBS and city Border 
+### Raw Data Sociodemographics CBS 
 cbs_NL  = gpd.read_file("data/cbs_vk100_2021_vol.gpkg") # downloaded 2024
-city_border = gpd.read_file("data/Gemeente2.geojson") # For Amsterdam in this case 
+
+### Raw Data City Border 
+city_border = gpd.read_file("data/Gemeente2.geojson") # for Amsterdam in this case 
 
 ### Raw Data GTFS
 df_realtime = pd.read_csv('data/gtfs_realtime_data_12_to_19.csv') # realtime GTFS week
 gtfs_zip_path = 'data/gtfs-nl.zip' # static GTFS data
 
 ### Parameters
-start_ts = pd.Timestamp('2024-03-15 05:30:00') # start time for the analysis
-end_ts = pd.Timestamp('2024-03-16 05:29:59') # end time for the analysis
-agency = 'GVB' # transport provider
+start_ts = pd.Timestamp('2024-03-15 05:30:00') # start time for the analysis  
+end_ts = pd.Timestamp('2024-03-16 05:29:59') # end time for the analysis  
+agency = 'GVB' # transport provider  
 buffer_distance = 50  # Buffer distance in meters
+
+---
 
 # PROCESS
 
