@@ -47,7 +47,7 @@ def process_cbs_data(cbs: gpd.GeoDataFrame, city: gpd.GeoDataFrame) -> tuple[gpd
     return semi_cbs, nan_summary
 ```
 
-##  'Final CBS data wrangling' # ## Final FUNCTION 
+##  'Final CBS data wrangling' 
 - For Amsterdam cleaned, filled, predicted, for space - 
 - Ready for use
 
