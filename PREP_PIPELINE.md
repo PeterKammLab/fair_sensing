@@ -49,9 +49,8 @@ def process_cbs_data(cbs: gpd.GeoDataFrame, city: gpd.GeoDataFrame) -> tuple[gpd
     - Cleaned CBS GeoDataFrame
     - NaN summary DataFrame
     """
-    # ...
-    # ...
-    # ...
+    # .....
+  
     return semi_cbs, nan_summary
 ```
 
@@ -72,9 +71,8 @@ def final_cbs_pipeline(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     2. Impute missing G_woz_woni values
     3. Adjust any remaining negative values
     """
-    # ...
-    # ...
-    # ...
+    # .....
+
     return cbs_full
 ```
 
@@ -101,10 +99,7 @@ def compute_city_stats(cbs_city):
     - Relative percentages for age and migration groups
     - Returns result as a one-row DataFrame
     """
-    # ...
-    # ...
-    # ...
-
+    # .....
     return stats
   ```
 ![CBS Data Processing Overview](images/01prep02.png)
@@ -146,9 +141,7 @@ def process_gtfs_pipeline(gtfs_realtime_df: pd.DataFrame, gtfs_zip_path: str,
     - points_per_day   : pd.Series of counts per date
     - min_max_per_day  : pd.DataFrame with min/max per date
     """
-    # ...
-    # ...
-    # ...
+    # .....
 
     return final_gdf, unique_day, points_per_day, min_max_per_day
 ```
@@ -175,9 +168,7 @@ def extract_public_lines(gtfs_zip_path: str, agency_id: str = 'GVB'):
     4 Merge shapes with trip metadata
     5 Filter for agency and modes
  """
-    # ...
-    # ...
-    # ...
+    # .....
 
     return public_transport, tram_unique, bus_unique, bus_day_unique, bus_night_unique
 
@@ -211,9 +202,7 @@ def snap_interpolated_points_to_routes(routes_gdf: gpd.GeoDataFrame, interpolate
     Returns:
     - GeoDataFrame of snapped GTFS points (deduplicated), projected in same CRS as routes_gdf
     """
-    #...
-    #...
-    #...
+    #.....
 
     return snapped
 
@@ -259,6 +248,8 @@ def lines_analysis(transport_gdf, cbs_gdf, buffer_distance = 50, line_number=Non
     - joined_gdf : CBS joined with transport buffer
     - average_stats : normalized summary statistics
     """
+    #.....
+
     return sums_df, gdf_meters, cbs_gdf, gdf_projected, joined_gdf, average_stats
 ```
 
@@ -278,8 +269,8 @@ def lines_visualisation(gdf_projected, cbs_gdf, joined_gdf, ams_gdf, sums_df, av
     2 Plot sums and percentages stacked (fig2)   
     3 Plot pp difference (fig3)
     4 Plot pie chart comaprison (fig4)
-
     """
+    #.....
 
     return fig1, fig2, fig3, fig4
 ```
@@ -319,6 +310,8 @@ def line_statistics_pipeline(gdf_projected, transport_gdf, cbs_gdf, buffer_dista
     Returns:
     - lines_stats : final prepared average line statistics DataFrame
     """
+    #.....
+
     return lines_stats
 ```
 
@@ -345,6 +338,8 @@ def migration_fairness_lines(lines_average_df, lines_gdf, ams_gdf, top_n=5, colu
     3. Plot fairness map (all lines).
     4. Plot top N fairest lines.
     """
+    #.....
+
     return closest_mig, migration_plot_fig, fairness_lines_mig_fig, top_fair_lines_mig_fig
 ```
 - **For all**
@@ -356,8 +351,9 @@ def all_fairness_lines(lines_average_df, lines_gdf, ams_gdf, columns = None,  to
     1. Find closest lines based on full socio-demographic and housing profile.
     2. Plot fairness map (all lines).
     3. Plot top N fairest lines.
-
     """
+    #.....
+
     return closest_all, fairness_lines_fig, top_fair_lines_fig
 ```
 ![mignewp1](images/05_prep_mignew1.png)
@@ -394,6 +390,8 @@ def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.Ge
     - grouped_by_points : DataFrame with intersected points, intervals, geometry
     - cbs_interval_counts : GeoDataFrame with counts per CBS cell and intervals
     """
+    #.....
+
     return grouped_by_points, cbs_interval_counts
 ```
 
