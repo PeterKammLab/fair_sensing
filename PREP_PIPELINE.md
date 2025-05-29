@@ -38,8 +38,8 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
   - Western migration background (`A_west_mig`)  
   - Non-western migration background (`A_n_west_mig`)  
 
-### 📥 RAW DATA INPUT: CBS 100×100 NL / City Border  
-### 📤 DATA OUTPUT: Cleaned CBS GeoDataFrame for Amsterdam  
+#### 📥 RAW DATA INPUT: CBS 100×100 NL / City Border  
+#### 📤 DATA OUTPUT: Cleaned CBS GeoDataFrame for Amsterdam  
 
 ```python
 def process_cbs_data(cbs: gpd.GeoDataFrame, city: gpd.GeoDataFrame) -> tuple[gpd.GeoDataFrame, pd.DataFrame]:
