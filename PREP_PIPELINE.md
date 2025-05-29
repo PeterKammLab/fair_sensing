@@ -34,7 +34,7 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 - Clip the national CBS 100×100 grid to the Amsterdam city boundary  
 - Replace invalid values (e.g. `-99997`) and remove missing data  
 - Rename columns and recalculate key demographic groups (migration and age groups)
-- 
+
 #### 📥 RAW DATA INPUT: CBS 100×100 NL / City Border  
 #### 📤 DATA OUTPUT: Cleaned CBS GeoDataFrame for Amsterdam  
 
