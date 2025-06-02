@@ -110,6 +110,14 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 
 #### 📤 OUTPUT DATA: Combined Stats Comparison Table  
 
+
+### 📸 Quick Visual Insights
+
+- Generate visual snapshots of optimized vehicles per strategy  
+- Includes: bar charts, spatial maps, radar/spider plots  
+
+📷 *(images inserted here as needed)*  
+
 ---
 
 ## 🚍 Prepare Optimized Vehicles for Visualization
@@ -120,24 +128,15 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 #### 📥 INPUT DATA: Optimized Vehicle Lists, Vehicles Stats GDF  
 #### 📤 OUTPUT DATA: Final GDF for Visualisation  
 
----
 
-## 📸 Quick Visual Insights
-
-- Generate visual snapshots of optimized vehicles per strategy  
-- Includes: bar charts, spatial maps, radar/spider plots  
-
-📷 *(images inserted here as needed)*  
-
----
 
 ## 🧪 Master Function: Final Analysis + Visualisation
 
-### 🔧 Function: `lines_analysis(...)`  
+### 🔧 Function Analysis
 - Inputs: Transport lines, CBS data  
 - Steps: Buffering, spatial join, stat summary  
 
-### 🧪 Function: `lines_visualisation(...)`  
+### 🧪 Function: Visualisation
 - Inputs: Amsterdam border, joined CBS + vehicle buffers  
 - Outputs:  
   - **fig1**: Map of covered area  
