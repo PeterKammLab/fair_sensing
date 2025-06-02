@@ -390,4 +390,4 @@ fig1, fig2, fig3, fig4 = visualization_master_function(
 
 ---
 
-🎯 *Next step: deploy the same pipeline for multiple days or agencies to compare results dynamically.*
+🎯 *Next step: deploy the same pipeline for multiple days and add frequencies pipeline {Workflow 3}
