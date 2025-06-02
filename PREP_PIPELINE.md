@@ -1,6 +1,6 @@
 # Preparation Pipeline {Workflow 01}
 
-This markdown file documents the end-to-end pipeline for optimizing public transport-based environmental sensing coverage. It shows how we transform raw spatial and temporal data into a strategic deployment plan using modular Python functions.
+This markdown file documents the end-to-end pipeline for optimizing public transport-based environmental sensing. It shows how we transform raw data into output used for optmizations for limited number of vehicles {Workflow 02}. 
 
 ---
 
