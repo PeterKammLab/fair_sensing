@@ -24,5 +24,5 @@ This markdown file documents the end-to-end pipeline for optimizing public trans
 
 ### ⚙️ Parameters  
 - **Number of vehicles**: e.g. 10 
-
+- **Number of days**: e.g. 1, 3 or 7
 ---
