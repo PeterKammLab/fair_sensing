@@ -55,7 +55,7 @@ def prepare_vehicles_with_stats(points_grouped, cbs_full):
     # .....
     return vehicles_stats
 ```
-
+![GDF Vehicles Overview](images/opti_1.png)
 ---
 
 ## 🌍 Spatial Optimization
@@ -90,6 +90,7 @@ def spatial_optimization_pipeline(points_gdf, cbs_gdf, vehicles_df, coverage_thr
     # .....
     return optimized_ids, filtered_vehicles, df_max_spatial
 ```
+![GDF Vehicles Spatial Top 10](images/opti_2.png)
 
 ---
 
@@ -117,7 +118,7 @@ def temporal_optimization_pipeline(gdf_vehicles, top_n=10):
     # .....
     return optimized_ids, top_vehicles, df_max_temporal
 ```
-
+![GDF Vehicles Temporal Top 10](images/opti_32.png)
 ---
 
 ## ⚖️ Fairness Optimization
@@ -150,6 +151,10 @@ def run_fairness_pipeline(gdf, ams_gdf, n=10):
     # .....
     return closest_simple, closest_relative, closest_absolute, df_area_statistics, df_optimizations, df_vehicle_ids
 ```
+![GDF Vehicles Fair Different Optimizations Top 10](images/opti_3.png)
+
+![GDF Vehicles Fair Different Optimizations Top 10 Comparison Fairness](images/opti_4.png)
+
 
 ---
 
@@ -199,7 +204,7 @@ def run_max_coverage_pipeline(
     # .....
     return tops, cbs_lists, max_number, gdf_filtered, summary_df
 ```
-
+![GDF Vehicles Population Different Optimizations Top 10](images/opti_5.png)
 ---
 
 ## 🔀 Merge All Optimizations
@@ -258,7 +263,8 @@ def vehicle_optimization_pipeline(
 
     # .....
 ```
-
+![GDF Vehicles All Together](images/opti_62.png)
+![GDF Vehicles All Together Stats](images/opti_6.png)
 
 ### 📸 Quick Visual Insights
 
@@ -280,8 +286,9 @@ def plot_vehicles_by_group(gdf, lists_dict, geo_boundary, color='#9EC043', alpha
         plt.show()
 ```
 
-📷 *(images inserted here as needed)*  
-
+📷
+![GDF Quick Viz Opti](images/opti_7.png)
+![GDF Quick Viz Opti](images/opti_72.png)
 ---
 
 ## 🚍 Prepare Optimized Vehicles for Visualization
@@ -369,8 +376,6 @@ def visualization_master_function(transport_filepath, cbs_gdf, joined_gdf, ams_g
     return fig1, fig2, fig3, fig4
 ```
 
-
-
 #### 📥 INPUT DATA:  
 - City Border  
 - Selected Vehicle Buffers  
@@ -387,6 +392,10 @@ sums_df, cbs_gdf, joined_gdf, average_stats = master_function_analysis(
 fig1, fig2, fig3, fig4 = visualization_master_function(
     gpd_vehicles, cbs_gdf, joined_gdf, ams_gdf, buffer_distance, sums_df, average_stats)
 ```
+![Final Viz Fig1](images/opti_fig1.png)
+![Final Viz Fig2](images/opti_fig2.png)
+![Final Viz Fig3](images/opti_fig3.png)
+![Final Viz Fig4](images/opti_fig4.png)
 
 ---
 
