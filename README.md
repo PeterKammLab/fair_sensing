@@ -4,7 +4,7 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
 
 ---
 
-📄 Research Title   **Fair sensing: optimizing environmental sensing deployments on public transport to cover broader demographics in Amsterdam**  | *with P. Koljensic, T. Venverloo, R. Vrijhoef,  F. Duarte, C. Ratti
+📄 Research Title   **Fair sensing: optimizing environmental sensing deployments on public transport to cover broader demographics in Amsterdam**  | with P. Koljensic, T. Venverloo, R. Vrijhoef,  F. Duarte, C. Ratti
 
 
 
