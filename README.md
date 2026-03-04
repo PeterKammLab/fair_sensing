@@ -55,7 +55,10 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
 
 └── README.md
 
-└── FUNCTIONS.md                     # 👉 [Pipeline](./FUNCTIONS.md)
+└── PREP_PIPELINE.md                     # 👉 [Pipeline_Preparation](./PREP_PIPELINE.md)
+
+└── OPTI_PIPELINE.md                     # 👉 [Pipeline_Optimization](./OPTI_PIPELINE.md)
+
 
 ## ⚙️ Installation
 
