@@ -86,7 +86,7 @@ The following files are included as raw (starting) data:
 
 The required GTFS (General Transit Feed Specification) Static + Reltime and CBS (Statistics Netherlands) grid data for running Fair Sensing can be downloaded from the following link:
 
-👉[**Download Data Here**](https://drive.google.com/drive/folders/1fw-R5vkeoFkxOWzpoEpzCw2sKcKDJV6D?usp=drive_link](https://drive.google.com/drive/folders/1Syc8wixeNlkNNIpqa5zViHflKfKdR2Dl?usp=drive_link)
+👉[**Download Data Here**](https://drive.google.com/drive/folders/1Syc8wixeNlkNNIpqa5zViHflKfKdR2Dl?usp=drive_link)
 
 Please download the data and place it in the `data/` directory of the Fair_Sensing_Repo to run the toolkit.
 
