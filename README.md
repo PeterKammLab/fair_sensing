@@ -150,9 +150,8 @@ Use notebooks for interactive workflows:
 -   `opti_notebook.ipynb`: Run optimization strategies
 -   `viz_notebook.ipynb`: Visualize outputs and maps
 -   `freq_notebook.ipynb`: Calculate and visualize frequency 
--   `*_3days.ipynb`, `*_7days.ipynb`: Extending and running for multiple days
--   `opti_notebook_random.ipynb`, `opti_notebook_summary.ipynb`: Create dataframes for research article 
--   `research_notebook.ipynb`: Make visualizations for research article (ex. *research_notebook_random*)
+-   `random_notebook.ipynb`: Create dataframes for research article 
+-   ``intransit_viz.R`: Make visualizations for research article (ex. *research_notebook_random*)
 
 ## 📄 License
 
