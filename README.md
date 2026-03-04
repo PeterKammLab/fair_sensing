@@ -47,14 +47,9 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
   - prep_notebook.ipynb
   - opti_notebook.ipynb
   - viz_notebook.ipynb
-  - prep_notebook_3days.ipynb
-  - prep_notebook_7days.ipynb
-  - opti_notebook_3days.ipynb
-  - opti_notebook_random.ipynb     #Dataframes for research
-  - opti_notebook_summary.ipynb    #Dataframes for research
-  - research_notbook.ipynb         #Exports for the research paper
-  - 
-├── .gitignore
+  - prep_notebook_freq.ipynb # For calculating temporal aspects for sensing, for maps
+  - intransit_viz.R    #Dataframes for research summaries
+  - random_notbook.ipynb         #Exports for the research paper with random values
 
 ├── requirements.txt
 
