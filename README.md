@@ -19,7 +19,7 @@ Fair Sensing is a Python toolkit for optimizing the deployment of limited number
 
 **fair_sensing/**
 
-├── data/    # Input data: GTFS, CBS, boundary files
+├── data/    # Input data: GTFS, CBS, boundary files; only Visualisation_Data with summaries; other datasets are online on drive due to its size.
 
 ├── Preparation/                # Preprocessing of CBS grids, GTFS and lines
   - analysis_viz_lines_stats_cbs_sensed.py
