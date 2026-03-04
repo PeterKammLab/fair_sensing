@@ -154,7 +154,7 @@ Use notebooks for interactive workflows:
 -   `viz_notebook.ipynb`: Visualize outputs and maps
 -   `freq_notebook.ipynb`: Calculate and visualize frequency 
 -   `random_notebook.ipynb`: Create dataframes for research article 
--   ``intransit_viz.R`: Make visualizations for research article (ex. *research_notebook_random*)
+-   `intransit_viz.R`: Make visualizations for research article (ex. *research_notebook_random*)
 
 ## 📄 License
 
