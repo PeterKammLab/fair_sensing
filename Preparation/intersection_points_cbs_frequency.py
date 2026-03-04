@@ -169,6 +169,7 @@ def group_points_by_cbs_and_intervals(intersected_points: gpd.GeoDataFrame,
 
 # FINAL FUNCTION 
 
+#old function problem with geometry and buffer - too many rows 
 def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.GeoDataFrame, buffer_size: float = 50):
     """
     Full in-memory pipeline to process realtime snapped points to CBS aggregation.
@@ -198,3 +199,45 @@ def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame, points_realtime: gpd.Ge
 
     return grouped_by_points, cbs_interval_counts
 
+
+
+# use only if the computer cannot calculate the whole buffer at once! 
+
+# def process_realtime_with_cbs(gdf_cbs: gpd.GeoDataFrame,
+#                              points_realtime: gpd.GeoDataFrame, buffered, 
+#                              buffer_size: float = 50):
+#     """
+#     Pipeline with chunked buffering of points_prepared (chunk size fixed at 300000).
+
+#     Steps:
+#     1. Prepare points.
+#     2. Buffer in chunks and concatenate.
+#     3. Spatial join intersections.
+#     4. Finalize intersections.
+#     5. Group by CBS cells and intervals.
+#     """
+#     # 1. Prepare points
+#     points_prepared = prepare_points_for_join(gdf_cbs, points_realtime)
+
+#     # 2. Buffer in fixed-size chunks
+    
+#     # chunks = np.array_split(points_prepared, 10)
+    
+#     # buffered_chunks = []
+#     # for df in chunks:
+#     #     df_chunk = df.copy()
+#     #     df_chunk["geometry"] = df_chunk.geometry.buffer(buffer_size)
+#     #     buffered_chunks.append(df_chunk)
+    
+#     # buffered = pd.concat(buffered_chunks, ignore_index=True)
+
+#     # 3. Spatial join intersections
+#     intersected = spatial_join_intersections(buffered, gdf_cbs)
+
+#     # 4. Finalize intersections
+#     grouped_by_points = finalize_intersections(intersected, points_prepared)
+
+#     # 5. Group by CBS cells and intervals
+#     # cbs_interval_counts = group_points_by_cbs_and_intervals(intersected, gdf_cbs)
+
+#     return grouped_by_points #cbs_interval_counts

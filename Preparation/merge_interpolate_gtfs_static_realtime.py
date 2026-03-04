@@ -67,7 +67,7 @@ from zipfile import ZipFile
 import geopandas as gpd
 import pandas as pd
 
-def enrich_and_filter_gtfs_data(filtered_realtime: pd.DataFrame, gtfs_zip_path: str, agency_id_filter: str = 'GVB') -> gpd.GeoDataFrame:
+def enrich_and_filter_gtfs_data(filtered_realtime: pd.DataFrame, gtfs_zip_path: str, agency_id_filter: str = "GVB" ) -> gpd.GeoDataFrame:
     """
     Merge real-time GTFS data with static GTFS routes.txt and filter for specific agency and route types (0 and 3).
 
@@ -253,7 +253,7 @@ def run_interpolation_on_traces(gdf_gvb: pd.DataFrame, interval: int = 5) -> gpd
 
 def process_gtfs_pipeline(gtfs_realtime_df: pd.DataFrame, gtfs_zip_path: str,
                                     start_timestamp: pd.Timestamp, end_timestamp: pd.Timestamp,
-                                    agency_id: str = 'GVB') -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.Series, pd.DataFrame]:
+                                    agency_id: str = "GVB") -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.Series, pd.DataFrame]:
     """
     Complete in-memory GTFS pipeline:
     1. Filter GTFS real-time to one day and print stats
