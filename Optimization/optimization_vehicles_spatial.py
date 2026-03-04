@@ -2,7 +2,7 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.spatial.distance import euclidean
+#from scipy.spatial.distance import euclidean
 import numpy as np
 import math
 
@@ -61,8 +61,9 @@ def prepare_vehicle_unique_ids(points_gdf, cbs_gdf):
     ).drop(columns='index_right') \
      .rename(columns={'crs28992': 'crs28992_orig'})
 
-    # Rename for clarity
-    points_gdf.rename(columns={'id': 'id_point', 'crs28992_orig': 'id'}, inplace=True)
+    # Use .loc to avoid SettingWithCopyWarning
+    points_gdf.loc[:, 'id_point'] = points_gdf['id']
+    points_gdf.loc[:, 'id'] = points_gdf['crs28992_orig']
 
     # Count unique CBS cells per vehicle
     vehicle_unique_ids = points_gdf.groupby('uni_id')['id'].nunique().reset_index()
@@ -139,27 +140,27 @@ def select_vehicles_for_max_coverage(points_gdf, vehicle_unique_ids, coverage_th
 
     return selected_uni_ids_df
 
-def extract_top_spatial_selection(selected_uni_ids_df, vehicles_df, top_n=10):
-    """
-    Extracts top-N spatially optimized vehicles.
+# def extract_top_spatial_selection(selected_uni_ids_df, vehicles_df, top_n=10):
+#     """
+#     Extracts top-N spatially optimized vehicles.
 
-    Parameters:
-    - selected_uni_ids_df : DataFrame with 'uni_id' column
-    - vehicles_df         : GeoDataFrame with 'uni_id'
-    - top_n               : number of top vehicles to select
+#     Parameters:
+#     - selected_uni_ids_df : DataFrame with 'uni_id' column
+#     - vehicles_df         : GeoDataFrame with 'uni_id'
+#     - top_n               : number of top vehicles to select
 
-    Returns:
-    - optimized_ids       : list of selected uni_ids (as 'max_spatial')
-    - filtered_vehicles   : GeoDataFrame filtered to those IDs
-    """
+#     Returns:
+#     - optimized_ids       : list of selected uni_ids (as 'max_spatial')
+#     - filtered_vehicles   : GeoDataFrame filtered to those IDs
+#     """
 
-    top_selected = selected_uni_ids_df.head(top_n).copy()
-    top_selected.rename(columns={'uni_id': 'max_spatial'}, inplace=True)
+#     top_selected = selected_uni_ids_df.head(top_n).copy()
+#     top_selected.rename(columns={'uni_id': 'max_spatial'}, inplace=True)
 
-    optimized_ids = top_selected['max_spatial'].to_list()
-    filtered_vehicles = vehicles_df[vehicles_df['uni_id'].isin(optimized_ids)].copy()
+#     optimized_ids = top_selected['max_spatial'].to_list()
+#     filtered_vehicles = vehicles_df[vehicles_df['uni_id'].isin(optimized_ids)].copy()
 
-    return optimized_ids, filtered_vehicles
+#     return optimized_ids, filtered_vehicles
 
 def extract_top_spatial_selection(selected_uni_ids_df, vehicles_df, top_n=10, seed=None):
     """

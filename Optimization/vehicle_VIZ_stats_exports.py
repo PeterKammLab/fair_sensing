@@ -48,28 +48,20 @@ def get_joined_cbs_gdf(vehicles_gdf, cbs_gdf, vehicle_crs_col='crs28922_list', c
     codes = extract_unique_crs_codes(vehicles_gdf, column=vehicle_crs_col)
     return cbs_gdf[cbs_gdf[cbs_crs_col].isin(codes)].copy()
 
+# vehicle_VIZ_stats_exports.py
+
 def generate_summary_statistics(cbs_gdf, area_name='Amsterdam'):
-    """
-    Calculates summary statistics from the CBS GeoDataFrame, excluding specified columns,
-    and formats the results into a summary DataFrame.
+    # 1) keep only numeric columns (drop geometry + id + mean col safely)
+    num_cols = cbs_gdf.select_dtypes(include='number').columns.difference(['G_woz_woni'])
+    sum_values = cbs_gdf[num_cols].sum(numeric_only=True)
 
-    Parameters:
-        cbs_gdf (gpd.GeoDataFrame): GeoDataFrame containing CBS data.
-
-    Returns:
-        pd.DataFrame: A DataFrame containing the summary statistics.
-    """
-    # Calculate the sum for numeric columns excluding 'G_woz_woni' and 'geometry'
-    sum_values = cbs_gdf.drop(columns=['geometry', 'G_woz_woni']).sum()
-    
-    # Calculate the average for 'G_woz_woni'
+    # 2) mean for WOZ
     average_woz_woni = cbs_gdf['G_woz_woni'].mean()
-    
-    # Round the sums and average to zero decimal places
+
+    # 3) round
     rounded_sum_values = sum_values.round(0)
     rounded_average_woz_woni = round(average_woz_woni, 0)
-    
-    # Create the summary row DataFrame
+
     summary_row_ams = pd.DataFrame({
         'Area': [area_name],
         'A_inhab': [rounded_sum_values.get('A_inhab', 0)],
@@ -83,10 +75,8 @@ def generate_summary_statistics(cbs_gdf, area_name='Amsterdam'):
         'A_west_mig': [rounded_sum_values.get('A_west_mig', 0)],
         'A_n_west_m': [rounded_sum_values.get('A_n_west_m', 0)],
     })
-
     summary_row_ams['A_inhab'] = summary_row_ams['A_inhab'].astype(int)
     summary_row_ams['G_woz_woni'] = summary_row_ams['G_woz_woni'].astype(int)
-
     return summary_row_ams
 
 def concatenate_dataframes(dfs, ignore_index=True):
@@ -246,8 +236,9 @@ def plot_stacked_sums(df, buffer_distance):
     ax.legend(loc='upper right')
     plt.title(f'Public transport sensing {buffer_distance}m buffer', fontweight='bold')
     plt.tight_layout()
-    plt.savefig('stacked_sums_plot.png', bbox_inches='tight')
+    #plt.savefig('stacked_sums_plot.png', bbox_inches='tight')
     plt.show()
+    #plt.savefig("Test_Gray2", dpi=300, bbox_inches='tight', facecolor='#e1e1e1')
 
 
 def plot_transport_and_population(lines, cbs_gdf, sensed_gdf, ams_gdf, buffer_distance, transport_type=None, lijn=None):
@@ -332,6 +323,142 @@ def plot_transport_and_population(lines, cbs_gdf, sensed_gdf, ams_gdf, buffer_di
     # Save plot as PNG
     #plt.savefig('transport_population_plot.png', bbox_inches='tight')
     #plt.close(fig)
+    #plt.savefig("Test_Gray1", dpi=300, bbox_inches='tight', facecolor='#e1e1e1')
+
+# def plot_comparison_difference(average_stats):
+#     """
+#     Plots the absolute difference in percentage points between Amsterdam and Sensed Area.
+#     """
+#     # prepare
+#     df = average_stats.drop(columns=['G_woz_woni'], errors='ignore')
+#     df_melted = df.melt(id_vars='Area', var_name='Metric', value_name='Value')
+#     df_pivot = df_melted.pivot_table(index='Metric', columns='Area', values='Value')
+
+#     # compute percentage‐point difference (pp)
+#     df_pivot['Difference (pp)'] = (
+#         df_pivot['Sensed Area'] - df_pivot['Amsterdam']
+#     ).round(4) * 100
+
+#     df_result = df_pivot.reset_index()
+
+#     # reorder so 'A_n_west_m' is last
+#     order = [m for m in df_result['Metric'] if m != 'A_n_west_m'] + ['A_n_west_m']
+#     df_result['Metric'] = pd.Categorical(df_result['Metric'], categories=order, ordered=True)
+#     df_result = df_result.sort_values('Metric')
+
+#     # custom labels
+#     x_labels = [
+#         'Age <15', 'Age 15-25', 'Age 25-45',
+#         'Age 45-65', 'Age >65',
+#         'Mig. Dutch', 'Mig. Western', 'Mig. Non‑Western'
+#     ]
+
+#     # plot
+#     plt.figure(figsize=(14, 6))
+#     ax = plt.gca()
+
+#     ax.axhline(0, color='#ffa3c4', linestyle='--', linewidth=3, zorder=1)
+#     ax.scatter(
+#         df_result['Metric'],
+#         df_result['Difference (pp)'],
+#         color='#85b66f',
+#         s=150,
+#         marker='o',
+#         label='Pop Sensed',
+#         zorder=2
+#     )
+
+#     ax.set_xlabel('Population Groups', fontweight='bold')
+#     ax.set_ylabel('Difference (pp)', fontweight='bold')
+#     ax.set_xticks(range(len(x_labels)))
+#     ax.set_xticklabels(x_labels, rotation=45, fontsize=8.5, ha='right', fontweight='bold')
+
+#     ax.set_ylim(-10, 10)  # <- Fix y-axis to always show ±10
+
+#     ax.grid(axis='y', linestyle='--', linewidth=0.5, alpha=0.7)
+#     for spine in ax.spines.values():
+#         spine.set_visible(False)
+#     ax.xaxis.set_ticks_position('none')
+#     ax.yaxis.set_ticks_position('none')
+
+#     ax.legend()
+#     ax.text(len(x_labels) - 1, 0, 'City Average', fontsize=10, ha='center', va='bottom', fontweight='bold')
+
+#     plt.title('Difference in Percentage Points: Sensed Area vs Amsterdam', fontweight='bold')
+#     plt.tight_layout()
+#     plt.show()
+#     plt.savefig("Test_Gray3", dpi=300, bbox_inches='tight', facecolor='#e1e1e1')
+
+
+# def plot_comparison_difference(average_stats):
+#     """
+#     Plots the absolute difference in percentage points between Amsterdam and Sensed Area,
+#     using a grey background.
+#     """
+#     # apply dark theme with grey background
+#     sns.set(style="darkgrid")
+#     plt.style.use("dark_background")
+    
+#     # prepare
+#     df = average_stats.drop(columns=['G_woz_woni'], errors='ignore')
+#     df_melted = df.melt(id_vars='Area', var_name='Metric', value_name='Value')
+#     df_pivot = df_melted.pivot_table(index='Metric', columns='Area', values='Value')
+    
+#     # compute percentage‐point difference (pp)
+#     df_pivot['Difference (pp)'] = (
+#         df_pivot['Sensed Area'] - df_pivot['Amsterdam']
+#     ).round(4) * 100
+    
+#     df_result = df_pivot.reset_index()
+    
+#     # reorder so 'A_n_west_m' is last
+#     order = [m for m in df_result['Metric'] if m != 'A_n_west_m'] + ['A_n_west_m']
+#     df_result['Metric'] = pd.Categorical(df_result['Metric'], categories=order, ordered=True)
+#     df_result = df_result.sort_values('Metric')
+    
+#     # custom labels
+#     x_labels = [
+#         'Age <15', 'Age 15-25', 'Age 25-45',
+#         'Age 45-65', 'Age >65',
+#         'Mig. Dutch', 'Mig. Western', 'Mig. Non-Western'
+#     ]
+    
+#     # plot
+#     fig = plt.figure(figsize=(14, 6))
+#     fig.patch.set_facecolor('#555555')   # figure background grey
+#     ax = plt.gca()
+#     ax.set_facecolor('#555555')          # plot area background grey
+    
+#     ax.axhline(0, color='#ffa3c4', linestyle='--', linewidth=3, zorder=1)
+#     ax.scatter(
+#         df_result['Metric'],
+#         df_result['Difference (pp)'],
+#         color='#85b66f',
+#         s=150,
+#         marker='o',
+#         label='Pop Sensed',
+#         zorder=2
+#     )
+    
+#     ax.set_xlabel('Population Groups', fontweight='bold')
+#     ax.set_ylabel('Difference (pp)', fontweight='bold')
+#     ax.set_xticks(range(len(x_labels)))
+#     ax.set_xticklabels(x_labels, rotation=45, fontsize=8.5, ha='right', fontweight='bold')
+    
+#     ax.set_ylim(-10, 10)
+#     ax.grid(axis='y', linestyle='--', linewidth=0.5, alpha=0.7)
+    
+#     for spine in ax.spines.values():
+#         spine.set_visible(False)
+#     ax.xaxis.set_ticks_position('none')
+#     ax.yaxis.set_ticks_position('none')
+    
+#     ax.legend()
+#     ax.text(len(x_labels) - 1, 0, 'City Average', fontsize=10, ha='center', va='bottom', fontweight='bold')
+    
+#     plt.title('Difference in Percentage Points: Sensed Area vs Amsterdam', fontweight='bold')
+#     plt.tight_layout()
+#     plt.show()
 
 def plot_comparison_difference(average_stats):
     """
@@ -362,8 +489,10 @@ def plot_comparison_difference(average_stats):
     ]
 
     # plot
-    plt.figure(figsize=(14, 6))
+    fig = plt.figure(figsize=(14, 6))
+    fig.patch.set_facecolor("#ffffff")  # Figure background
     ax = plt.gca()
+    ax.set_facecolor('white')           # Plot area background
 
     ax.axhline(0, color='#ffa3c4', linestyle='--', linewidth=3, zorder=1)
     ax.scatter(
@@ -381,6 +510,8 @@ def plot_comparison_difference(average_stats):
     ax.set_xticks(range(len(x_labels)))
     ax.set_xticklabels(x_labels, rotation=45, fontsize=8.5, ha='right', fontweight='bold')
 
+    ax.set_ylim(-10, 10)
+
     ax.grid(axis='y', linestyle='--', linewidth=0.5, alpha=0.7)
     for spine in ax.spines.values():
         spine.set_visible(False)
@@ -393,6 +524,8 @@ def plot_comparison_difference(average_stats):
     plt.title('Difference in Percentage Points: Sensed Area vs Amsterdam', fontweight='bold')
     plt.tight_layout()
     plt.show()
+
+
 
 def plot_pie_charts(average_stats, filename=None):
    
