@@ -25,8 +25,8 @@ def _city_row(city_stats):
     return city_stats.iloc[0] if isinstance(city_stats, pd.DataFrame) else city_stats
 
 
-def _vehicle_percentage_columns(vehicles):
-    out = vehicles.copy()
+def _add_percentage_columns(df):
+    out = df.copy()
     mappings = {
         "P_nederlan": "A_nederlan",
         "P_west_mig": "A_west_mig",
@@ -37,12 +37,23 @@ def _vehicle_percentage_columns(vehicles):
         "P_45_65": "A_45_65",
         "P_65+": "A_65+",
     }
+    pop = pd.to_numeric(out["A_inhab"], errors="coerce")
     for pct, absolute in mappings.items():
         if pct not in out.columns and absolute in out.columns:
-            out[pct] = pd.to_numeric(out[absolute], errors="coerce") / pd.to_numeric(
-                out["A_inhab"], errors="coerce"
-            ) * 100
+            out[pct] = pd.to_numeric(out[absolute], errors="coerce") / pop * 100
     return out
+
+
+def _normalize_ids(selected_vehicle_ids):
+    if isinstance(selected_vehicle_ids, pd.DataFrame):
+        if selected_vehicle_ids.shape[1] != 1:
+            raise ValueError("selected_vehicle_ids DataFrame must contain exactly one ID column.")
+        values = selected_vehicle_ids.iloc[:, 0]
+    elif isinstance(selected_vehicle_ids, pd.Series):
+        values = selected_vehicle_ids
+    else:
+        values = pd.Series(selected_vehicle_ids)
+    return values.dropna().astype(str).tolist()
 
 
 def woz_imputation_sensitivity(
@@ -74,33 +85,33 @@ def woz_imputation_sensitivity(
             "the revision update so WOZ provenance is retained."
         )
 
-    vehicles = _vehicle_percentage_columns(vehicles_gdf)
-    ids = pd.Series(selected_vehicle_ids).dropna().astype(str).tolist()
+    vehicles = _add_percentage_columns(vehicles_gdf)
+    ids = _normalize_ids(selected_vehicle_ids)
     selected = vehicles[vehicles[vehicle_id_col].astype(str).isin(ids)].copy()
     if selected.empty:
         raise ValueError("No selected vehicle IDs were found in vehicles_gdf.")
 
-    cbs = cbs_gdf.copy()
-    observed = cbs[~cbs[imputation_flag_col].astype(bool)].copy()
+    cbs = _add_percentage_columns(cbs_gdf)
+    populated = cbs[pd.to_numeric(cbs["A_inhab"], errors="coerce") > 0].copy()
+    observed = populated[~populated[imputation_flag_col].astype(bool)].copy()
     observed = observed[pd.to_numeric(observed["G_woz_woni"], errors="coerce").notna()].copy()
     if observed.empty:
         raise ValueError("No observed WOZ cells are available for sensitivity analysis.")
 
-    # Main standardized metric uses citywide SDs of the reduced fairness vector.
-    main_scales = {}
-    for f in FAIRNESS_FEATURES:
-        if f == "G_woz_woni":
-            vals = pd.to_numeric(cbs[f], errors="coerce")
-        else:
-            vals = pd.to_numeric(cbs[f], errors="coerce")
-        main_scales[f] = vals.std(ddof=1)
+    # Match the main fairness standardization: citywide cell-level SDs on populated cells.
+    main_scales = {
+        f: float(pd.to_numeric(populated[f], errors="coerce").std(ddof=1))
+        for f in FAIRNESS_FEATURES
+    }
 
-    # Main cumulative composition: mean selected vehicle percentage vectors.
-    main_composition = {f: pd.to_numeric(selected[f], errors="coerce").mean() for f in FAIRNESS_FEATURES}
+    main_composition = {
+        f: float(pd.to_numeric(selected[f], errors="coerce").mean())
+        for f in FAIRNESS_FEATURES
+    }
     city = _city_row(city_stats)
     main_city = np.array([float(city[f]) for f in FAIRNESS_FEATURES], dtype=float)
-    main_vec = np.array([float(main_composition[f]) for f in FAIRNESS_FEATURES], dtype=float)
-    main_sd = np.array([float(main_scales[f]) for f in FAIRNESS_FEATURES], dtype=float)
+    main_vec = np.array([main_composition[f] for f in FAIRNESS_FEATURES], dtype=float)
+    main_sd = np.array([main_scales[f] for f in FAIRNESS_FEATURES], dtype=float)
     main_distance = float(np.sqrt(np.sum(((main_vec - main_city) / main_sd) ** 2)))
 
     # Recompute observed-only WOZ for each selected vehicle from its CBS cell list.
@@ -129,8 +140,8 @@ def woz_imputation_sensitivity(
     if not observed_vehicle_woz:
         raise ValueError("Selected vehicles cover no CBS cells with observed WOZ values.")
 
-    sensitivity_vec = main_vec.copy()
     woz_index = FAIRNESS_FEATURES.index("G_woz_woni")
+    sensitivity_vec = main_vec.copy()
     sensitivity_vec[woz_index] = float(np.mean(observed_vehicle_woz))
 
     observed_city_woz = float(pd.to_numeric(observed["G_woz_woni"], errors="coerce").mean())
@@ -144,14 +155,12 @@ def woz_imputation_sensitivity(
         np.sqrt(np.sum(((sensitivity_vec - sensitivity_city) / sensitivity_sd) ** 2))
     )
 
-    # Unique-footprint exposure to imputation.
     all_codes = set()
     for value in selected[vehicle_crs_col]:
         all_codes.update(str(x) for x in _as_list(value))
     covered_unique = cbs[cbs_codes.isin(all_codes)].copy()
 
-    city_populated = cbs[pd.to_numeric(cbs["A_inhab"], errors="coerce") > 0]
-    city_imputed_pct = 100 * city_populated[imputation_flag_col].astype(bool).mean()
+    city_imputed_pct = 100 * populated[imputation_flag_col].astype(bool).mean()
     footprint_imputed_pct = (
         100 * covered_unique[imputation_flag_col].astype(bool).mean()
         if len(covered_unique) else np.nan
@@ -188,12 +197,6 @@ def measurement_frequency_sensitivity(
     measurements.
 
     This is a post-hoc coverage sensitivity, not a new optimization objective.
-
-    Returns
-    -------
-    classified : original CBS-frequency table plus max_hourly_count,
-                 hours_meeting_threshold and meaningfully_sensed.
-    summary    : one-row overview of all sensed vs threshold-meeting cells.
     """
     df = cbs_interval_counts.copy()
     excluded = {cbs_id_col, "count", "geometry"}
@@ -202,7 +205,6 @@ def measurement_frequency_sensitivity(
         if col in excluded:
             continue
         values = pd.to_numeric(df[col], errors="coerce")
-        # Hour columns generated by the existing pipeline look like 5-6, 23-0, etc.
         if isinstance(col, str) and "-" in col and values.notna().any():
             hour_cols.append(col)
 
@@ -240,12 +242,7 @@ def compare_frequency_demographics(
     classified_cbs,
     population_col="A_inhab",
 ):
-    """
-    Optional demographic comparison of all sensed vs meaningfully sensed cells.
-
-    This is deliberately separate from measurement_frequency_sensitivity so the
-    frequency map/count result can be used without making a fairness claim.
-    """
+    """Optional demographic comparison of all sensed vs meaningfully sensed cells."""
     mappings = {
         "P_nederlan": "A_nederlan",
         "P_west_mig": "A_west_mig",
