@@ -23,6 +23,19 @@ def _city_series(city_stats):
     return city_stats
 
 
+def _one_column(df, column):
+    """Return exactly one Series even when a dataframe contains duplicate column names."""
+    data = df.loc[:, column]
+    if isinstance(data, pd.DataFrame):
+        data = data.iloc[:, 0]
+    return data
+
+
+def _numeric_column(df, column):
+    """Return one numeric Series for a named column, tolerating duplicate GIS-join fields."""
+    return pd.to_numeric(_one_column(df, column), errors="coerce")
+
+
 def _scale_vector(scales):
     return np.array([float(scales[f]) for f in FAIRNESS_FEATURES], dtype=float)
 
@@ -52,24 +65,28 @@ def _cumulative_composition(selected_vehicles):
 
     values = {}
     for feature in REPORT_FEATURES:
-        values[feature] = float(
-            pd.to_numeric(selected_vehicles[feature], errors="coerce").mean()
-        )
+        values[feature] = float(_numeric_column(selected_vehicles, feature).mean())
     return values
 
 
-def _unique_composition(selected_vehicles, cbs_gdf, vehicle_crs_col="crs28922_list", cbs_crs_col="crs28992"):
+def _unique_composition(
+    selected_vehicles,
+    cbs_gdf,
+    vehicle_crs_col="crs28922_list",
+    cbs_crs_col="crs28992",
+):
     """Compute sociodemographic composition over the union of uniquely covered CBS cells."""
     if selected_vehicles.empty:
         return {feature: np.nan for feature in REPORT_FEATURES}, 0, 0.0
 
     codes = extract_unique_crs_codes(selected_vehicles, column=vehicle_crs_col)
-    covered = cbs_gdf[cbs_gdf[cbs_crs_col].isin(codes)].copy()
+    cbs_codes = _one_column(cbs_gdf, cbs_crs_col)
+    covered = cbs_gdf[cbs_codes.isin(codes)].copy()
 
     if covered.empty:
         return {feature: np.nan for feature in REPORT_FEATURES}, 0, 0.0
 
-    pop = pd.to_numeric(covered["A_inhab"], errors="coerce").sum()
+    pop = _numeric_column(covered, "A_inhab").sum()
     if not np.isfinite(pop) or pop <= 0:
         return {feature: np.nan for feature in REPORT_FEATURES}, len(covered), 0.0
 
@@ -86,12 +103,10 @@ def _unique_composition(selected_vehicles, cbs_gdf, vehicle_crs_col="crs28922_li
 
     values = {}
     for pct_col, count_col in mappings.items():
-        count = pd.to_numeric(covered[count_col], errors="coerce").sum()
+        count = _numeric_column(covered, count_col).sum()
         values[pct_col] = float(count / pop * 100)
 
-    values["G_woz_woni"] = float(
-        pd.to_numeric(covered["G_woz_woni"], errors="coerce").mean()
-    )
+    values["G_woz_woni"] = float(_numeric_column(covered, "G_woz_woni").mean())
     return values, len(covered), float(pop)
 
 
@@ -159,7 +174,7 @@ def build_revised_fairness_diagnostics(
     combined = create_combined_vehicle_df(*strategy_tables)
     lists_dict = extract_string_lists(combined)
 
-    total_city_pop = float(pd.to_numeric(cbs_gdf["A_inhab"], errors="coerce").sum())
+    total_city_pop = float(_numeric_column(cbs_gdf, "A_inhab").sum())
     records = []
 
     for strategy, ids in lists_dict.items():
@@ -209,8 +224,6 @@ def _append_diagnostic_rows(master_df, diagnostics, city_name="Amsterdam"):
     """Append revision metrics to the existing strategy-as-columns master table."""
     out = master_df.copy()
 
-    # Remove the obsolete raw Euclidean row so it is not confused with the
-    # corrected standardized metric.
     if "euclidean_distance" in out.index:
         out = out.drop(index="euclidean_distance")
 
@@ -234,7 +247,6 @@ def _append_diagnostic_rows(master_df, diagnostics, city_name="Amsterdam"):
         }
         out.loc[output_row] = pd.Series(values)
 
-    # Add per-group diagnostics for transparent reporting.
     demographic_features = [f for f in REPORT_FEATURES if f != "G_woz_woni"]
     for feature in demographic_features:
         for prefix, readable in (("Cumulative", "cumulative"), ("Unique", "unique")):
@@ -254,7 +266,6 @@ def _append_diagnostic_rows(master_df, diagnostics, city_name="Amsterdam"):
             out.loc[f"ppdev_{readable}_{feature}"] = pd.Series(pp_values)
             out.loc[f"ratio_{readable}_{feature}"] = pd.Series(ratio_values)
 
-    # City/reference values for new rows.
     if city_name in out.columns:
         for row in [
             "distance_cumulative_standardized",
