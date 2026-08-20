@@ -11,6 +11,7 @@ from .revised_fairness_evaluation import build_revised_fairness_diagnostics # de
 from .sensitivity_analysis import woz_imputation_sensitivity # WOZ complete-case robustness check
 from .sensitivity_analysis import measurement_frequency_sensitivity # repeated-measurement coverage sensitivity
 from .sensitivity_analysis import compare_frequency_demographics # optional demographic comparison for frequency sensitivity
+from .sensitivity_analysis import frequency_threshold_table # compare hourly threshold attainment across optimization strategies
 from .optimization_big_merge_stats_VIZ_points import plot_vehicles_by_group # plot the vehicles by optmization - quick visualization
 from .optimization_big_merge_stats_VIZ_points import extract_string_lists # extract the string lists from the dataframe for analysis
 from .create_optimized_vehicles_gdf import prepare_selected_vehicles_from_combined # prepare the selected vehicles from the combined dataframe for analysis and visualization
