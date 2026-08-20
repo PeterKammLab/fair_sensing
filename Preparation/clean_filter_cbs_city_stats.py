@@ -29,7 +29,7 @@ def clean_and_adjust_cbs(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'A_nederlan': 'A_nederlan',
         'A_west_mig': 'A_west_mig',
         'A_n_west_mig': 'A_n_west_m',
-    }) 			
+    })
 
     # drop housing column if present
     if 'A_woning' in cbs.columns:
@@ -81,36 +81,35 @@ def clean_and_adjust_cbs(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return cbs
 
 
-
-
 def impute_woz_with_regression(cbs_full: pd.DataFrame) -> pd.DataFrame:
     """
-    Use linear regression to impute missing or invalid (negative) G_woz_woni values in CBS data.
+    Use linear regression to impute missing G_woz_woni values in CBS data.
 
-    Parameters:
-    - cbs_full : DataFrame with population and housing attributes
-
-    Returns:
-    - Updated DataFrame with G_woz_woni imputed and cleaned
+    The existing function name and imputation logic are retained. For revision
+    diagnostics, a boolean `WOZ_imputed` column is added before values are
+    replaced so observed and imputed cells can still be distinguished later.
     """
     features = ['A_inhab', 'A_0_15', 'A_15_25', 'A_25_45', 'A_45_65', 'A_65+',
                 'A_nederlan', 'A_west_mig', 'A_n_west_m']
     target = 'G_woz_woni'
 
-    # Split known and missing target values
+    # Preserve provenance before replacing any values.
+    # Negative WOZ values are also treated as non-observed because the existing
+    # pipeline replaces them with the mean below.
+    original_target = pd.to_numeric(cbs_full[target], errors='coerce')
+    cbs_full['WOZ_imputed'] = original_target.isna() | (original_target < 0)
+
     known = cbs_full[cbs_full[target].notna()]
     missing = cbs_full[cbs_full[target].isna()]
 
-    # Train regression model
     model = LinearRegression()
     model.fit(known[features], known[target])
 
-    # Predict missing
     if not missing.empty:
         preds = model.predict(missing[features])
         cbs_full.loc[cbs_full[target].isna(), target] = preds
 
-    # Replace negative values with mean of non-negative entries
+    # Preserve the original fallback for negative values.
     mean_woz = cbs_full[cbs_full[target] >= 0][target].mean()
     cbs_full.loc[cbs_full[target] < 0, target] = mean_woz
 
@@ -128,13 +127,11 @@ def adjust_negative_values(cbs_full: pd.DataFrame) -> pd.DataFrame:
     - Cleaned DataFrame with non-negative age/migration columns and preserved group totals
     """
 
-    # Define column groups
     age_cols = ['A_0_15', 'A_15_25', 'A_25_45', 'A_45_65', 'A_65+']
     mig_cols = ['A_nederlan', 'A_west_mig', 'A_n_west_m']
 
     def adjust_negatives(row, cols):
         deficit = sum(-row[col] for col in cols if row[col] < 0)
-        original_sum = sum(row[col] for col in cols)
         for col in cols:
             if row[col] < 0:
                 row[col] = 0
@@ -147,11 +144,9 @@ def adjust_negative_values(cbs_full: pd.DataFrame) -> pd.DataFrame:
             deficit -= 1
         return row
 
-    # Apply to migration and age columns
     cbs_full = cbs_full.apply(lambda row: adjust_negatives(row, mig_cols), axis=1)
     cbs_full = cbs_full.apply(lambda row: adjust_negatives(row, age_cols), axis=1)
 
-    # Recompute and verify
     cbs_full['migration_sum'] = cbs_full[mig_cols].sum(axis=1)
     cbs_full['age_sum'] = cbs_full[age_cols].sum(axis=1)
     print(cbs_full[['A_inhab', 'migration_sum', 'age_sum']].head())
@@ -159,8 +154,7 @@ def adjust_negative_values(cbs_full: pd.DataFrame) -> pd.DataFrame:
     return cbs_full
 
 
-
-# FINAL FUNCTION 1 
+# FINAL FUNCTION 1
 
 def final_cbs_pipeline(cbs: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -191,13 +185,11 @@ def compute_city_stats(cbs_city):
     total_inhab = cbs_city['A_inhab'].sum()
     mean_woz = round(cbs_city['G_woz_woni'].mean(), 2)
 
-    # absolute sums
     age_cols = ['A_0_15', 'A_15_25', 'A_25_45', 'A_45_65', 'A_65+']
     mig_cols = ['A_nederlan', 'A_west_mig', 'A_n_west_m']
     age_sums = cbs_city[age_cols].sum()
     mig_sums = cbs_city[mig_cols].sum()
 
-    # calculate and round percentages
     pct_age = (age_sums / total_inhab * 100).round(2)
     pct_mig = (mig_sums / total_inhab * 100).round(2)
 
