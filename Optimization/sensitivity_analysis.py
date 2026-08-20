@@ -98,7 +98,6 @@ def woz_imputation_sensitivity(
     if observed.empty:
         raise ValueError("No observed WOZ cells are available for sensitivity analysis.")
 
-    # Match the main fairness standardization: citywide cell-level SDs on populated cells.
     main_scales = {
         f: float(pd.to_numeric(populated[f], errors="coerce").std(ddof=1))
         for f in FAIRNESS_FEATURES
@@ -114,7 +113,6 @@ def woz_imputation_sensitivity(
     main_sd = np.array([main_scales[f] for f in FAIRNESS_FEATURES], dtype=float)
     main_distance = float(np.sqrt(np.sum(((main_vec - main_city) / main_sd) ** 2)))
 
-    # Recompute observed-only WOZ for each selected vehicle from its CBS cell list.
     cbs_codes = cbs[cbs_crs_col].astype(str)
     rows = []
     observed_vehicle_woz = []
@@ -273,3 +271,63 @@ def compare_frequency_demographics(
             record["G_woz_woni"] = pd.to_numeric(subset["G_woz_woni"], errors="coerce").mean()
         records.append(record)
     return pd.DataFrame(records)
+
+
+def frequency_threshold_table(
+    strategy_interval_counts,
+    hours=("7-8", "13-14", "19-20", "1-2"),
+    threshold_per_hour=12,
+):
+    """
+    Compare hourly sensing-frequency adequacy across optimization strategies.
+
+    Parameters
+    ----------
+    strategy_interval_counts : dict
+        Mapping of strategy name -> CBS interval-count GeoDataFrame/DataFrame.
+    hours : iterable of str
+        Hourly interval columns to evaluate.
+    threshold_per_hour : int or float
+        Minimum measurements required within the selected hour.
+
+    Returns
+    -------
+    long_table : DataFrame
+        One row per strategy/hour with counts and percentage meeting threshold.
+    wide_table : DataFrame
+        Compact strategy x hour table of percentages meeting threshold.
+    """
+    if not isinstance(strategy_interval_counts, dict) or not strategy_interval_counts:
+        raise ValueError("strategy_interval_counts must be a non-empty dict of strategy name -> interval-count table.")
+
+    rows = []
+    for strategy, df in strategy_interval_counts.items():
+        for hour in hours:
+            if hour not in df.columns:
+                raise ValueError(f"Hourly column {hour!r} is missing for strategy {strategy!r}.")
+
+            counts = pd.to_numeric(df[hour], errors="coerce").fillna(0)
+            sensed_any = counts > 0
+            meets_threshold = counts >= threshold_per_hour
+
+            n_sensed = int(sensed_any.sum())
+            n_meeting = int(meets_threshold.sum())
+            share = np.nan if n_sensed == 0 else 100 * n_meeting / n_sensed
+
+            rows.append({
+                "Optimization": strategy,
+                "Hour": hour,
+                "Threshold_per_hour": threshold_per_hour,
+                "Cells_sensed_any": n_sensed,
+                "Cells_meeting_threshold": n_meeting,
+                "Share_meeting_threshold_pct": share,
+            })
+
+    long_table = pd.DataFrame(rows)
+    wide_table = (
+        long_table
+        .pivot(index="Optimization", columns="Hour", values="Share_meeting_threshold_pct")
+        .reindex(columns=list(hours))
+        .reset_index()
+    )
+    return long_table, wide_table
