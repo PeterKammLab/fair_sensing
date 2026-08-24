@@ -3,7 +3,7 @@ import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
 import mapclassify
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import ListedColormap
 import matplotlib.patches as mpatches
 
 # Merge 
@@ -47,23 +47,45 @@ def process_sensing_data_from_gdf(freq_cbs_data):
 
 # Visualization functions
 
+# Figure 9: eight explicit ordered colours for eight quantile classes.
+# Low frequency starts in dark neutral grey, progresses through distinct orange
+# tones, and transitions to green for the highest-frequency classes.
+FREQUENCY_CLASS_COLORS = [
+    '#7F7F7F',  # lowest frequency - dark grey
+    '#A69A8B',  # warm grey
+    '#C8894F',  # muted orange
+    '#E09A45',  # orange
+    '#E7B64F',  # amber / yellow-orange
+    '#B8B557',  # yellow-green transition
+    '#82A95A',  # medium green
+    '#4F8F46',  # highest frequency - dark green
+]
+
+# Figure 7: muted orange = below the hourly target; green = meets the target.
+THRESHOLD_LOW_COLOR = '#C8894F'
+THRESHOLD_HIGH_COLOR = '#85b66f'
+
+
 def plot_counts(interval_counts_CBS_data, ams_gdf, column_to_plot='count'):
     """
     Plots and returns a figure of the selected column values from interval_counts_CBS_data with the area boundary.
 
+    Uses eight explicit ordered colours for the eight quantile classes so each
+    class can be distinguished in the map and legend.
+
     Returns:
         fig (matplotlib.figure.Figure): The figure object for further use or saving.
     """
-    interval_counts_CBS_data = interval_counts_CBS_data[interval_counts_CBS_data[column_to_plot] > 0]
+    interval_counts_CBS_data = interval_counts_CBS_data[
+        interval_counts_CBS_data[column_to_plot] > 0
+    ].copy()
     interval_counts_CBS_data = interval_counts_CBS_data.to_crs(ams_gdf.crs)
 
     plt.style.use('default')
-    custom_cmap = LinearSegmentedColormap.from_list("custom_cmap", ['#898989', '#FFB668', '#85b66f'])
+    custom_cmap = ListedColormap(FREQUENCY_CLASS_COLORS, name='frequency_8_classes')
 
     fig, ax = plt.subplots(figsize=(15, 10))
     ams_gdf.boundary.plot(ax=ax, linewidth=0.5, edgecolor='black')
-
-    classifier = mapclassify.Quantiles(interval_counts_CBS_data[column_to_plot], k=8)
 
     interval_counts_CBS_data.plot(
         column=column_to_plot,
@@ -81,21 +103,24 @@ def plot_counts(interval_counts_CBS_data, ams_gdf, column_to_plot='count'):
     ax.set_axis_off()
     return fig
 
+
 def plot_counts_threshold(weighted_freq_cbs, ams_gdf, column_to_plot='count', threshold=12):
     """
     Plots selected column from weighted_freq_cbs with threshold coloring:
-    - Grey if value < threshold
+    - Muted orange if value < threshold
     - Green if value >= threshold
     Includes legend. No axes.
 
     Returns:
         fig (matplotlib.figure.Figure): The figure object for saving or further use.
     """
-    weighted_freq_cbs = weighted_freq_cbs[weighted_freq_cbs[column_to_plot] > 0]
+    weighted_freq_cbs = weighted_freq_cbs[
+        weighted_freq_cbs[column_to_plot] > 0
+    ].copy()
     weighted_freq_cbs = weighted_freq_cbs.to_crs(ams_gdf.crs)
 
     weighted_freq_cbs['color'] = weighted_freq_cbs[column_to_plot].apply(
-        lambda x: '#85b66f' if x >= threshold else '#898989'
+        lambda x: THRESHOLD_HIGH_COLOR if x >= threshold else THRESHOLD_LOW_COLOR
     )
 
     plt.style.use('default')
@@ -111,8 +136,8 @@ def plot_counts_threshold(weighted_freq_cbs, ams_gdf, column_to_plot='count', th
     )
 
     legend_handles = [
-        mpatches.Patch(color='#898989', label=f'< {threshold} per hour'),
-        mpatches.Patch(color='#85b66f', label=f'≥ {threshold} per hour')
+        mpatches.Patch(color=THRESHOLD_LOW_COLOR, label=f'< {threshold} per hour'),
+        mpatches.Patch(color=THRESHOLD_HIGH_COLOR, label=f'≥ {threshold} per hour')
     ]
     ax.legend(handles=legend_handles, loc='upper right', frameon=False)
 
@@ -121,6 +146,7 @@ def plot_counts_threshold(weighted_freq_cbs, ams_gdf, column_to_plot='count', th
     plt.tight_layout()
 
     return fig
+
 
 def plot_ratios_comparison(ratios_df):
     """
@@ -171,10 +197,10 @@ def pipeline_plot_frequency(interval_counts_CBS, cbs, ams_gdf, column_to_plot, t
     # calculate ratios
     ratios_df = process_sensing_data_from_gdf(interval_counts_CBS_data)
     
-    # Plot frequency for interval '4-5'
+    # Plot frequency
     fig_frequency = plot_counts(interval_counts_CBS_data, ams_gdf, column_to_plot)
     
-    # Plot frequency with threshold for interval '7-8'
+    # Plot frequency with threshold
     fig_frequency_th = plot_counts_threshold(interval_counts_CBS_data, ams_gdf, column_to_plot, threshold)
     
     # Plot frequency ratios comparison
