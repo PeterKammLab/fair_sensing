@@ -61,9 +61,8 @@ FREQUENCY_CLASS_COLORS = [
     '#4F8F46',  # highest frequency - dark green
 ]
 
-# Figure 7: orange = below the hourly target; green = meets the target.
-# This is consistent with the visual language used in the other frequency map.
-THRESHOLD_LOW_COLOR = '#F1A65A'
+# Figure 7: muted blue = below the hourly target; green = meets the target.
+THRESHOLD_LOW_COLOR = '#2596be'
 THRESHOLD_HIGH_COLOR = '#85b66f'
 
 
@@ -108,7 +107,7 @@ def plot_counts(interval_counts_CBS_data, ams_gdf, column_to_plot='count'):
 def plot_counts_threshold(weighted_freq_cbs, ams_gdf, column_to_plot='count', threshold=12):
     """
     Plots selected column from weighted_freq_cbs with threshold coloring:
-    - Orange if value < threshold
+    - Blue if value < threshold
     - Green if value >= threshold
     Includes legend. No axes.
 
