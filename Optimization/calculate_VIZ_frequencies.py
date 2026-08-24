@@ -47,23 +47,24 @@ def process_sensing_data_from_gdf(freq_cbs_data):
 
 # Visualization functions
 
-# Figure 9: eight ordered and visually distinct classes.
-# The progression remains low -> high while avoiding several adjacent classes
-# looking like the same broad grey/orange/green hue.
+# Figure 9: eight explicit ordered colours for eight quantile classes.
+# Low frequencies progress through warm orange tones, then transition through
+# yellow to green for higher frequencies. Adjacent classes are intentionally
+# separated more strongly for easier visual discrimination.
 FREQUENCY_CLASS_COLORS = [
-    '#E6E6E6',  # lowest frequency
-    '#E8D5B7',
-    '#E7C28B',
-    '#E4AD62',
-    '#D8B95E',
-    '#B9B85B',
-    '#8FAE58',
-    '#5B984D',  # highest frequency
+    '#F3E5C8',  # lowest frequency
+    '#F1C27D',
+    '#E99B4D',
+    '#D9772B',
+    '#D6B84C',
+    '#A8B34E',
+    '#7FA857',
+    '#4F8F46',  # highest frequency
 ]
 
-# Figure 7: lighter neutral grey so the below-threshold class is clearly
-# distinguishable from the green above-threshold class.
-THRESHOLD_LOW_COLOR = '#D9D9D9'
+# Figure 7: orange = below the hourly target; green = meets the target.
+# This is consistent with the visual language used in the other frequency map.
+THRESHOLD_LOW_COLOR = '#F1A65A'
 THRESHOLD_HIGH_COLOR = '#85b66f'
 
 
@@ -108,7 +109,7 @@ def plot_counts(interval_counts_CBS_data, ams_gdf, column_to_plot='count'):
 def plot_counts_threshold(weighted_freq_cbs, ams_gdf, column_to_plot='count', threshold=12):
     """
     Plots selected column from weighted_freq_cbs with threshold coloring:
-    - Light grey if value < threshold
+    - Orange if value < threshold
     - Green if value >= threshold
     Includes legend. No axes.
 
