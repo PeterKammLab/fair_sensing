@@ -97,52 +97,58 @@ def concatenate_dataframes(dfs, ignore_index=True):
 
 def calculate_and_compare_sums(cbs_gdf, sensed_gdf):
     """
-    Calculates and compares the sums of columns for two GeoDataFrames, and computes the percentage
-    of the sensed values relative to the city's total values.
+    Compare sensed vs city-wide population totals.
 
-    Parameters:
-        cbs_gdf (gpd.GeoDataFrame): GeoDataFrame containing the full city's data.
-        sensed_gdf (gpd.GeoDataFrame): GeoDataFrame containing the sensed data.
-
-    Returns:
-        pd.DataFrame: A DataFrame containing the sums for both datasets and the percentage of sensed values.
+    Only actual population/demographic variables are included so technical
+    helper columns (for example WOZ_imputed) cannot enter the population plots.
     """
-    # Calculate the sum of all columns except 'G_woz_woni', 'geometry', 'index_right', and 'Lijn_Numbe' for the city-wide data
-    cbs_sums = cbs_gdf.drop(columns=['crs28992', 'G_woz_woni', 'geometry', 'age_sum', 'migration_' ]).sum()
-    
-    # Extract values from the Series
-    values_t = cbs_sums.values
+    population_cols = [
+        'A_inhab',
+        'A_0_15',
+        'A_15_25',
+        'A_25_45',
+        'A_45_65',
+        'A_65+',
+        'A_nederlan',
+        'A_west_mig',
+        'A_n_west_m'
+    ]
 
-    # Calculate the sum of all columns except 'G_woz_woni', 'geometry', 'index_right', and 'Lijn_Numbe' for the sensed data
-    sensed_sums = sensed_gdf.drop(columns=['crs28992', 'G_woz_woni', 'geometry', 'age_sum', 'migration_']).sum() 				
-    
-    # Extract values from the Series
-    values_s = sensed_sums.values
+    # Keep only columns available in both datasets.
+    population_cols = [
+        col for col in population_cols
+        if col in cbs_gdf.columns and col in sensed_gdf.columns
+    ]
 
-    # Extract keys (index) from the Series
-    keys = sensed_sums.index
+    cbs_sums = (
+        cbs_gdf[population_cols]
+        .apply(pd.to_numeric, errors='coerce')
+        .sum()
+    )
+    sensed_sums = (
+        sensed_gdf[population_cols]
+        .apply(pd.to_numeric, errors='coerce')
+        .sum()
+    )
 
-    # Create a new DataFrame
-    data = {
-        'Sociodemo': keys,
-        'Sums_sensed': values_s,
-        'Sums_total': values_t
-    }
+    sums = pd.DataFrame({
+        'Sociodemo': population_cols,
+        'Sums_sensed': [sensed_sums[col] for col in population_cols],
+        'Sums_total': [cbs_sums[col] for col in population_cols]
+    })
 
-    sums = pd.DataFrame(data)
-    
-    # Calculate the percentage of sensed values relative to the city's total values
-    sums['Sensed_%'] = ((sums['Sums_sensed'] / sums['Sums_total']) * 100).round(2)
-    # Calculate exclusion
-    sums['Excluded!'] = (sums['Sums_total'] - sums['Sums_sensed']).round(0)
+    sums['Sensed_%'] = (
+        sums['Sums_sensed'] / sums['Sums_total'] * 100
+    ).round(2)
+    sums['Excluded!'] = (
+        sums['Sums_total'] - sums['Sums_sensed']
+    ).round(0)
 
-
-    # Convert sums to integer values for cleaner display
     sums['Sums_sensed'] = sums['Sums_sensed'].astype(int)
     sums['Sums_total'] = sums['Sums_total'].astype(int)
     sums['Sensed_%'] = sums['Sensed_%'].astype(float)
     sums['Excluded!'] = sums['Excluded!'].astype(int)
-    
+
     return sums
 
 def normalize_statistics(merged_df):
@@ -643,7 +649,6 @@ def visualization_master_function(gpd_vehicles, cbs_gdf, joined_gdf, ams_gdf, bu
     fig4 = plot_pie_charts(average_stats)
 
     return fig1, fig2, fig3, fig4
-
 
 
 
