@@ -18,3 +18,6 @@ from .create_optimized_vehicles_gdf import prepare_selected_vehicles_from_combin
 from .vehicle_VIZ_stats_exports import master_function_analysis # run the analysis for the selected vehicles
 from .vehicle_VIZ_stats_exports import visualization_master_function # run the visualization for the selected vehicles
 from .calculate_VIZ_frequencies import pipeline_plot_frequency # run the pipeline for plotting the frequencies of the selected vehicles
+from .intransit_summary import create_intransit_summary # create R-ready optimization trade-off summary tables
+from .intransit_summary import filter_weekly_candidate_pool # apply common >=6-day weekly candidate pool
+from .intransit_summary import DEFAULT_SAMPLES # sample sizes used in optimization trade-off figure
