@@ -48,18 +48,17 @@ def process_sensing_data_from_gdf(freq_cbs_data):
 # Visualization functions
 
 # Figure 9: eight explicit ordered colours for eight quantile classes.
-# Low frequencies progress through warm orange tones, then transition through
-# yellow to green for higher frequencies. Adjacent classes are intentionally
-# separated more strongly for easier visual discrimination.
+# Low frequency starts in dark neutral grey, progresses through distinct orange
+# tones, and transitions to green for the highest-frequency classes.
 FREQUENCY_CLASS_COLORS = [
-    '#F3E5C8',  # lowest frequency
-    '#F1C27D',
-    '#E99B4D',
-    '#D9772B',
-    '#D6B84C',
-    '#A8B34E',
-    '#7FA857',
-    '#4F8F46',  # highest frequency
+    '#7F7F7F',  # lowest frequency - dark grey
+    '#A69A8B',  # warm grey
+    '#C8894F',  # muted orange
+    '#E09A45',  # orange
+    '#E7B64F',  # amber / yellow-orange
+    '#B8B557',  # yellow-green transition
+    '#82A95A',  # medium green
+    '#4F8F46',  # highest frequency - dark green
 ]
 
 # Figure 7: orange = below the hourly target; green = meets the target.
