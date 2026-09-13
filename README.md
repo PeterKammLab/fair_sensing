@@ -1,160 +1,144 @@
 # Fair Sensing
 
-Fair Sensing is a Python toolkit for optimizing the deployment of limited number of sensors on public transport vehicles to maximize environmental sensing potenital for different metrics such as spatial and population coverage, frequency and sociodemographic fairness. It provides a modular pipeline to prepare, compute, and visualize multiple optimization strategies across urban geographies using GTFS data, CBS (Statistics Netherlands) grids, and spatial analysis and visualization techniques.
+Fair Sensing is a Python toolkit for optimizing the deployment of a limited number of sensors on public transport vehicles for environmental sensing. The workflow supports spatial coverage, temporal measurement frequency, population coverage, and sociodemographic representativeness using GTFS data, CBS (Statistics Netherlands) 100 × 100 m grids, and spatial analysis methods.
 
 ---
 
-📄 Research Title   **Fair sensing: optimizing environmental sensing deployments on public transport to cover broader demographics in Amsterdam**  | with P. Koljensic, T. Venverloo, R. Vrijhoef,  F. Duarte, C. Ratti
+📄 Research title: **Fair sensing: optimizing environmental sensing deployments on public transport to cover broader demographics in Amsterdam**  
+Authors: P. Koljensic, T. Venverloo, R. Vrijhoef, F. Duarte, C. Ratti
 
-
+This `scientific-reports` branch contains the code used for the revised Scientific Reports manuscript. The archived repository version is available via Zenodo: **https://doi.org/10.5281/zenodo.22032018**.
 
 ## 💡 Key Features
 
--   Apply multiple strategies: spatial, temporal demographic, fairness
--   Analyze demographic equity: e.g. % youth, elderly, Dutch/non-western migrants in sensed areas
--   Export full sensing coverage and vehicle deployment stats 
--   Compatible with GTFS-static, GTFS-realtime and CBS 100x100m grid data
+- Apply spatial, temporal, population, and fairness-oriented vehicle selection strategies.
+- Quantify sociodemographic representativeness using standardized Euclidean distance across selected demographic and socioeconomic variables.
+- Compare cumulative representativeness with unique spatial population coverage.
+- Evaluate measurement-frequency thresholds for environmental sensing.
+- Export sensing coverage, vehicle-level statistics, and visualization-ready outputs.
+- Work with GTFS-static, GTFS-Realtime, and CBS 100 × 100 m grid data.
+
+## Scientific Reports revision
+
+The revised analysis includes several methodological updates used in the manuscript:
+
+- Fairness is operationalized as sociodemographic representativeness rather than as a broader measure of social or environmental justice.
+- The fairness metric uses standardized Euclidean distance so variables with different numerical scales do not dominate the result.
+- One reference category is omitted from each compositional demographic block when calculating the distance, while all categories remain available for descriptive reporting.
+- Mahalanobis distance is available as a robustness check for correlations between dimensions.
+- Cumulative and unique representation are reported separately to distinguish repeated sensing along overlapping routes from the unique spatial footprint reached by sensors.
+- One-week optimization comparisons use a common eligible vehicle pool across the spatial, temporal, and fairness strategies.
+- Additional sensitivity analyses cover WOZ imputation, candidate-pool restrictions, and measurement-frequency thresholds.
 
 ## 📁 Repository Structure
 
-**fair_sensing/**
-
-├── data/    # Input data: GTFS, CBS, boundary files; only Visualisation_Data with summaries; other datasets are online on drive due to its size.
-
-├── Preparation/                # Preprocessing of CBS grids, GTFS and lines
-  - analysis_viz_lines_stats_cbs_sensed.py
-  - cbs_data_cleanup.py
-  - clean_filter_cbs_city_stats.py
-  - create_public_lines.py
-  - fairest_lines_analysis_viz.py
-  - intersection_points_cbs_frequency.py
-  - merge_interpolate_gtfs_static_realtime.py
-  - snap_points_to_lines.py
-
-├── Optimization/               # All vehicle optimization strategy scripts
-  - analysis_vehicles_stats.py
-  - calculate_VIZ_frequencies.py
-  - create_combined_df.py
-  - create_optimized_vehicles_gdf.py
-  - optimization_big_merge_stats_VIZ_points.py
-  - optimization_vehicles_spatial.py
-  - optmization_vehicles_temporal.py
-  - optimization_vehicles_maximum.py
-  - optimization_vehicles_fairness.py
-  - vehicle_VIZ_stats_exports.py
-    
-├── notebooks/                  # Notebooks for fast analysis
-  - prep_notebook.ipynb
-  - opti_notebook.ipynb
-  - viz_notebook.ipynb
-  - prep_notebook_freq.ipynb # For calculating temporal aspects for sensing, for maps
-  - intransit_viz.R    #Dataframes for research summaries
-  - random_notbook.ipynb         #Exports for the research paper with random values
-
+```text
+fair_sensing/
+├── Preparation/              # CBS, GTFS and spatial preprocessing
+├── Optimization/             # Vehicle optimization and evaluation methods
+│   ├── optimization_vehicles_spatial.py
+│   ├── optimization_vehicles_temporal.py
+│   ├── optimization_vehicles_maximum.py
+│   ├── optimization_vehicles_fairness.py
+│   ├── revised_fairness_evaluation.py
+│   ├── sensitivity_analysis.py
+│   ├── calculate_VIZ_frequencies.py
+│   ├── analysis_vehicles_stats.py
+│   └── vehicle_VIZ_stats_exports.py
+├── Visualisation_Data/       # Summary datasets used for visualisation
+├── prep_notebook.ipynb       # Data preparation workflow
+├── opti_notebook.ipynb       # Optimization workflow
+├── frequency_notebook.ipynb  # Frequency and threshold analysis
+├── random_notebook.ipynb     # Random-selection analysis for the paper
+├── viz_notebook.ipynb        # Visualisation workflow
+├── intransit_viz.R           # Research visualisations and summaries
+├── PREP_PIPELINE.md
+├── OPTI_PIPELINE.md
 ├── requirements.txt
-
 └── README.md
-
-└── PREP_PIPELINE.md                     # 👉 [Pipeline_Preparation](./PREP_PIPELINE.md)
-
-└── OPTI_PIPELINE.md                     # 👉 [Pipeline_Optimization](./OPTI_PIPELINE.md)
-
+```
 
 ## ⚙️ Installation
 
-Clone the repository and install required dependencies:
+Clone the repository and install the required dependencies:
 
 ```bash
-git clone [https://github.com/your-org/Fair_Sensing.git](https://github.com/your-org/Fair_Sensing.git)
-cd Fair_Sensing
+git clone https://github.com/PeterKammLab/fair_sensing.git
+cd fair_sensing
+git checkout scientific-reports
 pip install -r requirements.txt
-`````
-#Replace your-org with your GitHub username or organization name.
+```
 
 ## Data
 
-The following files are included as raw (starting) data:
+The analysis uses GTFS-static, GTFS-Realtime, municipal boundary data, and CBS 100 × 100 m population-grid data. Because several raw and intermediate datasets are too large for the repository, they are provided separately.
 
-- 🗺️ `bounding_box.geojson` – Spatial extent for clipping (city) 
-- 🧱 `cbs_vk100_2021_vol.gpkg` – CBS 100x100m grid data (Netherlands) | [source CBS](https://www.cbs.nl/nl-nl/longread/diversen/2022/statistische-gegevens-per-vierkant-2021-2020-2019)
-- 📊 `city_stats_amsterdam.csv` – Demographic statistics (city) | [source CBS](https://www.cbs.nl/nl-nl/longread/diversen/2022/statistische-gegevens-per-vierkant-2021-2020-2019)
-- 🧭 `gemeente_T.*` – Shapefile set for municipal boundaries (city) | [source Gemeente Amsterdam](https://maps.amsterdam.nl/open_geodata/)
-- 🌐 `Gemeente2.geojson` – GeoJSON version of municipality polygons (city) | [source Gemeente Amsterdam](https://maps.amsterdam.nl/open_geodata/)
-- 🚋 `gtfs_realtime_data_12_to_19.xlsx` – Preprocessed GVB GTFS-realtime data | [source GTFS Realtime Feed](https://developers.google.com/transit/gtfs-realtime)
-- 🚌 `gtfs-nl.zip` – GTFS-static data for Dutch transit (zipped) |  [source GTFS OV NL](https://gtfs.ovapi.nl/)
-- 💧 `water_amsterdam.gpkg` – Water bodies layer for map visualization | [source OpenStreepMap](https://www.openstreetmap.org/)
+👉 [Download input data](https://drive.google.com/drive/folders/1Syc8wixeNlkNNIpqa5zViHflKfKdR2Dl?usp=drive_link)
 
-The required GTFS (General Transit Feed Specification) Static + Reltime and CBS (Statistics Netherlands) grid data for running Fair Sensing can be downloaded from the following link:
+👉 [Download preprocessed datasets](https://drive.google.com/drive/folders/1hv7WDF4EGc7FlyPk4ohoI1-mw4Ern0-j?usp=sharing)
 
-👉[**Download Data Here**](https://drive.google.com/drive/folders/1Syc8wixeNlkNNIpqa5zViHflKfKdR2Dl?usp=drive_link)
+Place the downloaded data in the expected `data/` paths before running the workflows. The code can also be adapted to other compatible GTFS and GTFS-Realtime datasets.
 
-Please download the data and place it in the `data/` directory of the Fair_Sensing_Repo to run the toolkit.
+Main source datasets include:
 
-If you want to speed up the processing time of preparation and optimization scripts, there are preprocessed datasets available here:
-
-👉 [**Download Preprocessed Datasets**](https://drive.google.com/drive/folders/1hv7WDF4EGc7FlyPk4ohoI1-mw4Ern0-j?usp=sharing)
-
-Alternatively, Fair Sensing is designed to be flexible. You can also use your own GTFS and GTFS-realtime data, placing it within the `data/temp` directory and ensuring the file names are consistent with the expected input formats for the scripts. This allows you to analyze specific datasets and real-world scenarios as you wish.
+- `cbs_vk100_2021_vol.gpkg` – CBS 100 × 100 m grid data for the Netherlands.
+- `city_stats_amsterdam.csv` – Amsterdam demographic summary statistics.
+- `gemeente_T.*` / `Gemeente2.geojson` – Amsterdam municipal boundaries.
+- GTFS-static schedules and GTFS-Realtime vehicle-location feeds.
+- `water_amsterdam.gpkg` – water layer used in map visualisation.
 
 ## 📊 Workflow Overview
 
-Below are key flowcharts describing the logic and process of Fair Sensing:
-
-**💾 Parameters, Data & Download**
+**Parameters, Data & Download**  
 ![Parameters, Data & Download Diagram](images/parameters_data_download_diagram.jpg)
 
-**🧹 Preparation Pipeline**
+**Preparation Pipeline**  
 ![Preparation Flowchart](images/prep_flowchart.jpg)
 
-**🚦 Optimization, Freq & Vis Pipeline**
+**Optimization, Frequency and Visualisation Pipeline**  
 ![Optimization, Frequency and Visualisation Flowchart](images/opti_viz_freq_flowchart.jpg)
+
+For more detail, see [PREP_PIPELINE.md](./PREP_PIPELINE.md) and [OPTI_PIPELINE.md](./OPTI_PIPELINE.md).
 
 ## 🚀 How to Use
 
-### 1. 📊 Data Preparation  
-Prepare GTFS and CBS data for analysis:
+### 1. Data preparation
 
 ```bash
 python Preparation/cbs_data_cleanup.py
 python Preparation/merge_interpolate_gtfs_static_realtime.py
-`````
+```
 
-### 2. 🧠 Run Optimization Strategies
+### 2. Optimization strategies
 
-Each script implements a specific logic:
-
--   **Spatial coverage:** `optimization_vehicles_spatial.py`
--   **Temporal coverage:** 'optmiziation_vehicles_temporal.py'
--   **Maximize population sensing:** `optimization_vehicles_maximum.py`
--   **Fairness-based matching:** `optimization_vehicles_fairness.py`
--   **Combine outputs:** `create_combined_df.py`
+- Spatial coverage: `Optimization/optimization_vehicles_spatial.py`
+- Temporal coverage: `Optimization/optimization_vehicles_temporal.py`
+- Maximum population coverage: `Optimization/optimization_vehicles_maximum.py`
+- Fairness / sociodemographic representativeness: `Optimization/optimization_vehicles_fairness.py`
 
 Example:
 
 ```bash
 python Optimization/optimization_vehicles_spatial.py
-`````
+```
 
-### 3. 📈 Analysis & Export
-
-Analyze statistics and export visual-ready outputs:
+### 3. Analysis and export
 
 ```bash
 python Optimization/analysis_vehicles_stats.py
 python Optimization/calculate_VIZ_frequencies.py
 python Optimization/vehicle_VIZ_stats_exports.py
-`````
+```
 
-### 4. 🧪 Notebooks
+### 4. Notebooks
 
-Use notebooks for interactive workflows:
+The notebooks provide interactive versions of the main workflows:
 
--   `prep_notebook.ipynb`: Clean and prepare CBS and GTFS
--   `opti_notebook.ipynb`: Run optimization strategies
--   `viz_notebook.ipynb`: Visualize outputs and maps
--   `freq_notebook.ipynb`: Calculate and visualize frequency 
--   `random_notebook.ipynb`: Create dataframes for research article 
--   `intransit_viz.R`: Make visualizations for research article (ex. *research_notebook_random*)
+- `prep_notebook.ipynb` – prepare CBS and GTFS data.
+- `opti_notebook.ipynb` – run optimization strategies.
+- `frequency_notebook.ipynb` – calculate hourly frequency and threshold sensitivity.
+- `random_notebook.ipynb` – generate random-selection comparison outputs for the paper.
+- `viz_notebook.ipynb` – create maps and other visual outputs.
 
 ## 📄 License
 
