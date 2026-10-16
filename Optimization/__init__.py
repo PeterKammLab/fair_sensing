@@ -2,17 +2,22 @@ from .analysis_vehicles_stats import prepare_vehicles_with_stats # first make st
 from .optimization_vehicles_spatial import spatial_optimization_pipeline # then optimize the vehicles for spatial coverage
 from .optimization_vehicles_temporal import temporal_optimization_pipeline # then optimize the vehicles for temporal coverage
 from .optimization_vehicles_fairness import run_fairness_pipeline # then optimize the vehicles for fairness
-from .optimization_vehicles_maximum import run_max_coverage_pipeline # then optimize the vehicles for maximum inhabitants, points, etc. 
+from .optimization_vehicles_maximum import run_max_coverage_pipeline # then optimize the vehicles for maximum inhabitants, points, etc.
 from .create_combined_df import combine_optimized_dfs # combine the results into one dataframe
-from .optimization_vehicles_combined import compute_combined_optimization_scores # compute the final scores combined vehicles optimization 
-from .optimization_big_merge_stats_VIZ_points import select_random_vehicles # select random vehicles for optmization 
-from .optimization_big_merge_stats_VIZ_points import vehicle_optimization_stats_pipeline # run the optimization pipeline for stats
-from .optimization_big_merge_stats_VIZ_points import plot_vehicles_by_group # plot the vehicles by optmization - quick visualization 
+from .optimization_vehicles_combined import compute_combined_optimization_scores # compute the final scores combined vehicles optimization
+from .optimization_big_merge_stats_VIZ_points import select_random_vehicles # select random vehicles for optmization
+from .revised_fairness_evaluation import vehicle_optimization_stats_pipeline_revised as vehicle_optimization_stats_pipeline # revised stats pipeline, existing public function name preserved
+from .revised_fairness_evaluation import build_revised_fairness_diagnostics # detailed fairness diagnostics
+from .sensitivity_analysis import woz_imputation_sensitivity # WOZ complete-case robustness check
+from .sensitivity_analysis import measurement_frequency_sensitivity # repeated-measurement coverage sensitivity
+from .sensitivity_analysis import compare_frequency_demographics # optional demographic comparison for frequency sensitivity
+from .sensitivity_analysis import frequency_threshold_table # compare hourly threshold attainment across optimization strategies
+from .optimization_big_merge_stats_VIZ_points import plot_vehicles_by_group # plot the vehicles by optmization - quick visualization
 from .optimization_big_merge_stats_VIZ_points import extract_string_lists # extract the string lists from the dataframe for analysis
 from .create_optimized_vehicles_gdf import prepare_selected_vehicles_from_combined # prepare the selected vehicles from the combined dataframe for analysis and visualization
 from .vehicle_VIZ_stats_exports import master_function_analysis # run the analysis for the selected vehicles
 from .vehicle_VIZ_stats_exports import visualization_master_function # run the visualization for the selected vehicles
 from .calculate_VIZ_frequencies import pipeline_plot_frequency # run the pipeline for plotting the frequencies of the selected vehicles
-
-
-
+from .intransit_summary import create_intransit_summary # create R-ready optimization trade-off summary tables
+from .intransit_summary import filter_weekly_candidate_pool # apply common >=6-day weekly candidate pool
+from .intransit_summary import DEFAULT_SAMPLES # sample sizes used in optimization trade-off figure
