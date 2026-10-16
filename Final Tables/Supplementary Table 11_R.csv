@@ -1,0 +1,11 @@
+Variable,Coefficient
+Intercept,507.6
+A_inhab (Inhabitants) ,0.3
+A_0_15 (Children),4.02
+A_25_15,-0.52
+A_25_45,-2.26
+A_45_65,1.1
+A_65+ (Older Adults) ,-2.03
+A_nederlan (Dutch background),0.29
+A_west_mig (Western migration background),2.58
+A_n_west_m (Non-Western migration background),-2.57
