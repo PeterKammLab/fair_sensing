@@ -1,0 +1,5 @@
+Strategy,Vehicles,CBS_cells_sensed_24h,Total_measurements_24h,Avg_measurements_per_sensed_cell_24h,Avg_measurements_per_hour_per_sensed_cell
+Spatial,6,1807,51182,28.32,1.18
+Temporal,6,150,58602,390.68,16.28
+Fairness,6,1062,30210,28.45,1.19
+All vehicles,278,2953,2187131,740.65,30.86
